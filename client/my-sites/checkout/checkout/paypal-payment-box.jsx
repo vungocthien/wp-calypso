@@ -27,6 +27,7 @@ import config from 'config';
 import { PLAN_BUSINESS } from 'lib/plans/constants';
 import CartToggle from './cart-toggle';
 import wp from 'lib/wp';
+import AlternativePaymentMethods from './alternative-payment-methods';
 
 const wpcom = wp.undocumented();
 
@@ -153,9 +154,7 @@ module.exports = localize(React.createClass( {
 			config.isEnabled( 'upgrades/presale-chat' ) &&
 			abtest( 'presaleChatButton' ) === 'showChatButton' &&
 			hasBusinessPlanInCart;
-		const creditCardButtonClasses = classnames( 'credit-card-payment-box__switch-link', {
-			'credit-card-payment-box__switch-link-left': showPaymentChatButton,
-		} );
+
 		return (
             <form onSubmit={ this.redirectToPayPal }>
 				<div className="payment-box-section">
@@ -197,14 +196,12 @@ module.exports = localize(React.createClass( {
 						<SubscriptionText cart={ this.props.cart } />
 					</div>
 
-					{ cartValues.isCreditCardPaymentsEnabled( this.props.cart ) && (
-						<a href="" className={ creditCardButtonClasses } onClick={ this.handleToggle }>
-							{ this.props.translate( 'or use a credit card', {
-								context: 'Upgrades: PayPal checkout screen',
-								comment: 'Checkout with PayPal -- or use a credit card',
-							} ) }
-						</a>
-					) }
+					<AlternativePaymentMethods
+						cart={ this.props.cart }
+						paymentMethods={ this.props.paymentMethods }
+						selectedPaymentMethod="paypal"
+						onSelectPaymentMethod={ this.props.onSelectPaymentMethod }
+						/>
 
 					{ showPaymentChatButton && (
 						<PaymentChatButton paymentType="paypal" cart={ this.props.cart } />
