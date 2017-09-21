@@ -261,7 +261,7 @@ export class CommentDetail extends Component {
 				tabIndex="0"
 			>
 				{ refreshCommentData &&
-					<QueryComment commentId={ commentId } siteId={ siteId } />
+					<QueryComment commentId={ commentId } siteId={ siteId } forceWpcom />
 				}
 
 				<CommentDetailHeader
