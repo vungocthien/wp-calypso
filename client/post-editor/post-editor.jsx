@@ -5,7 +5,7 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import page from 'page';
 import PropTypes from 'prop-types';
-import { debounce, throttle, get } from 'lodash';
+import { debounce, flow, get, throttle } from 'lodash';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { localize } from 'i18n-calypso';
@@ -1321,41 +1321,47 @@ export const PostEditor = React.createClass( {
 
 } );
 
-export default connect(
-	( state ) => {
-		const siteId = getSelectedSiteId( state );
-		const postId = getEditorPostId( state );
-		const userId = getCurrentUserId( state );
+const enhance = flow(
+	localize,
+	protectForm,
+	connect(
+		( state ) => {
+			const siteId = getSelectedSiteId( state );
+			const postId = getEditorPostId( state );
+			const userId = getCurrentUserId( state );
 
-		return {
-			siteId,
-			postId,
-			selectedSite: getSelectedSite( state ),
-			editorModePreference: getPreference( state, 'editor-mode' ),
-			editorSidebarPreference: getPreference( state, 'editor-sidebar' ) || 'open',
-			editPath: getEditorPath( state, siteId, postId ),
-			edits: getPostEdits( state, siteId, postId ),
-			dirty: isEditedPostDirty( state, siteId, postId ),
-			hasContent: editedPostHasContent( state, siteId, postId ),
-			layoutFocus: getCurrentLayoutFocus( state ),
-			hasBrokenPublicizeConnection: hasBrokenSiteUserConnection( state, siteId, userId ),
-			isSitePreviewable: isSitePreviewable( state, siteId ),
-			isConfirmationSidebarEnabled: isConfirmationSidebarEnabled( state, siteId ),
-		};
-	},
-	( dispatch ) => {
-		return bindActionCreators( {
-			setEditorLastDraft,
-			resetEditorLastDraft,
-			receivePost,
-			editPost,
-			savePostSuccess,
-			setEditorModePreference: savePreference.bind( null, 'editor-mode' ),
-			setEditorSidebar: savePreference.bind( null, 'editor-sidebar' ),
-			setLayoutFocus,
-			saveConfirmationSidebarPreference,
-		}, dispatch );
-	},
-	null,
-	{ pure: false }
-)( protectForm( localize( PostEditor ) ) );
+			return {
+				siteId,
+				postId,
+				selectedSite: getSelectedSite( state ),
+				editorModePreference: getPreference( state, 'editor-mode' ),
+				editorSidebarPreference: getPreference( state, 'editor-sidebar' ) || 'open',
+				editPath: getEditorPath( state, siteId, postId ),
+				edits: getPostEdits( state, siteId, postId ),
+				dirty: isEditedPostDirty( state, siteId, postId ),
+				hasContent: editedPostHasContent( state, siteId, postId ),
+				layoutFocus: getCurrentLayoutFocus( state ),
+				hasBrokenPublicizeConnection: hasBrokenSiteUserConnection( state, siteId, userId ),
+				isSitePreviewable: isSitePreviewable( state, siteId ),
+				isConfirmationSidebarEnabled: isConfirmationSidebarEnabled( state, siteId ),
+			};
+		},
+		( dispatch ) => (
+			bindActionCreators( {
+				setEditorLastDraft,
+				resetEditorLastDraft,
+				receivePost,
+				editPost,
+				savePostSuccess,
+				setEditorModePreference: savePreference.bind( null, 'editor-mode' ),
+				setEditorSidebar: savePreference.bind( null, 'editor-sidebar' ),
+				setLayoutFocus,
+				saveConfirmationSidebarPreference,
+			}, dispatch )
+		),
+		null,
+		{ pure: false }
+	)
+);
+
+export default enhance( PostEditor );
