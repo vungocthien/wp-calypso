@@ -57,22 +57,24 @@ export class PluginActivateToggle extends Component {
 		if ( disabled ) {
 			return (
 				<span className="plugin-activate-toggle__disabled">
-					{ translate( 'Manage Connection', { comment: 'manage Jetpack connnection settings link' } ) }
 					<span className="plugin-activate-toggle__icon"><Gridicon icon="cog" size={ 18 } /></span>
+					<span className="plugin-activate-toggle__label">
+						{ translate( 'Manage Connection', { comment: 'manage Jetpack connnection settings link' } ) }
+					</span>
 				</span>
 			);
 		}
 
 		return (
 			<span className="plugin-activate-toggle__link">
-				<a onClick={ this.trackManageConnectionLink }
-					href={ '/settings/manage-connection/' + site.slug } >
-					{ translate( 'Manage Connection', { comment: 'manage Jetpack connnection settings link' } ) }
-				</a>
 				<a className="plugin-activate-toggle__icon"
 					onClick={ this.trackManageConnectionLink }
 					href={ '/settings/manage-connection/' + site.slug } >
 					<Gridicon icon="cog" size={ 18 } />
+				</a>
+				<a className="plugin-activate-toggle__label" onClick={ this.trackManageConnectionLink }
+					href={ '/settings/manage-connection/' + site.slug } >
+					{ translate( 'Manage Connection', { comment: 'manage Jetpack connnection settings link' } ) }
 				</a>
 			</span>
 		);

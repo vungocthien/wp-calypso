@@ -1,3 +1,4 @@
+/** @format */
 /**
  * External dependencies
  */
@@ -20,37 +21,35 @@ const PluginAction = React.createClass( {
 	},
 
 	renderLabel() {
-		if ( this.props.label ) {
-			return (
-				<label
-					className="plugin-action__label"
-					ref="disabledInfoLabel"
-					onClick={ this.handleAction }
-					htmlFor={ this.props.htmlFor }
-					key="renderDisabledInfoLabel"
-					>
-					{ this.props.label }
-				</label>
-			);
+		if ( ! this.props.label ) {
+			return null;
 		}
-		return null;
+
+		return (
+			<span className="plugin-action__label" ref="disabledInfoLabel" onClick={ this.handleAction }>
+				{ this.props.label }
+				{ this.renderDisabledInfo() }
+			</span>
+		);
 	},
 
 	renderDisabledInfo() {
-		return [
+		if ( ! this.props.disabledInfo ) {
+			return null;
+		}
+
+		return (
 			<InfoPopover
-				key="renderDisabledInfoPopOver"
 				className="plugin-action__disabled-info"
 				position="bottom left"
 				popoverName={ 'Plugin Action Disabled' + this.props.label }
 				gaEventCategory="Plugins"
 				ref="infoPopover"
 				ignoreContext={ this.refs && this.refs.disabledInfoLabel }
-				>
+			>
 				{ this.props.disabledInfo }
-			</InfoPopover>,
-			this.renderLabel()
-		];
+			</InfoPopover>
+		);
 	},
 
 	renderToggle() {
@@ -59,7 +58,7 @@ const PluginAction = React.createClass( {
 				onChange={ this.props.action }
 				checked={ this.props.status }
 				toggling={ this.props.inProgress }
-				disabled={ this.props.disabled }
+				disabled={ this.props.disabled || !! this.props.disabledInfo }
 				id={ this.props.htmlFor }
 			>
 				{ this.renderLabel() }
@@ -69,18 +68,14 @@ const PluginAction = React.createClass( {
 
 	renderChildren() {
 		return (
-			<div>
-				<span className="plugin-action__children">{ this.props.children }</span>
+			<span className="plugin-action__children">
+				{ this.props.children }
 				{ this.renderLabel() }
-			</div>
+			</span>
 		);
 	},
 
 	renderInner() {
-		if ( this.props.disabledInfo ) {
-			return this.renderDisabledInfo();
-		}
-
 		if ( 0 < React.Children.count( this.props.children ) ) {
 			return this.renderChildren();
 		}
@@ -91,7 +86,7 @@ const PluginAction = React.createClass( {
 	render() {
 		const additionalClasses = {
 			'is-disabled': this.props.disabled,
-			'has-disabled-info': !! this.props.disabledInfo
+			'has-disabled-info': !! this.props.disabledInfo,
 		};
 
 		return (
@@ -99,7 +94,7 @@ const PluginAction = React.createClass( {
 				{ this.renderInner() }
 			</div>
 		);
-	}
+	},
 } );
 
 export default PluginAction;

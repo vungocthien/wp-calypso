@@ -55,7 +55,7 @@ export class PluginAutoUpdateToggle extends Component {
 			return null;
 		}
 
-		if ( ! wporg ) {
+		if ( wporg ) {
 			return translate( 'This plugin is not in the WordPress.org plugin repository, so we can\'t autoupdate it.' );
 		}
 
