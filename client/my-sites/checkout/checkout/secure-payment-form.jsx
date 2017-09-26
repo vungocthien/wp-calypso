@@ -117,6 +117,7 @@ const SecurePaymentForm = React.createClass( {
 				newPayment = storeTransactions.fullCreditsPayment();
 				break;
 
+			case 'ebanx':
 			case 'credit-card':
 				if ( this.getInitialCard() ) {
 					newPayment = storeTransactions.storedCardPayment( this.getInitialCard() );
@@ -194,6 +195,21 @@ const SecurePaymentForm = React.createClass( {
 		);
 	},
 
+	renderEbanxCreditCardPaymentBox() {
+		return (
+			<CreditCardPaymentBox
+				cards={ this.props.cards }
+				transaction={ this.props.transaction }
+				cart={ this.props.cart }
+				countriesList={ countriesListForPayments }
+				initialCard={ this.getInitialCard() }
+				selectedSite={ this.props.selectedSite }
+				onToggle={ this.selectPaymentBox }
+				onSubmit={ this.handlePaymentBoxSubmit }
+				transactionStep={ this.props.transaction.step } />
+		);
+	},
+
 	renderPayPalPaymentBox() {
 		return (
 			<PayPalPaymentBox
@@ -244,6 +260,7 @@ const SecurePaymentForm = React.createClass( {
 			case 'free-cart':
 				return this.renderFreeCartPaymentBox();
 
+			case 'ebanx':
 			case 'credit-card':
 				return this.renderCreditCardPaymentBox();
 
