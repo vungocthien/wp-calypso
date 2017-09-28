@@ -161,7 +161,8 @@ const Pages = localize( React.createClass( {
 	},
 
 	getNoContentMessage() {
-		const { search, translate } = this.props;
+		const { translate } = this.props;
+		const { search, status = 'published' } = this.props.query;
 
 		if ( search ) {
 			return (
@@ -177,13 +178,13 @@ const Pages = localize( React.createClass( {
 			);
 		}
 
-		const { site, siteId, status = 'published' } = this.props;
+		const { site, siteId } = this.props;
 		const sitePart = site && site.slug || siteId;
 		const newPageLink = this.props.siteId ? '/page/' + sitePart : '/page';
 		let attributes;
 
 		switch ( status ) {
-			case 'drafts':
+			case 'draft,pending':
 				attributes = {
 					title: translate( 'You don\'t have any drafts.' ),
 					line: translate( 'Would you like to create one?' ),
@@ -191,7 +192,7 @@ const Pages = localize( React.createClass( {
 					actionURL: newPageLink
 				};
 				break;
-			case 'scheduled':
+			case 'future':
 				attributes = {
 					title: translate( 'You don\'t have any scheduled pages yet.' ),
 					line: translate( 'Would you like to create one?' ),
@@ -199,7 +200,7 @@ const Pages = localize( React.createClass( {
 					actionURL: newPageLink
 				};
 				break;
-			case 'trashed':
+			case 'trash':
 				attributes = {
 					title: translate( 'You don\'t have any pages in your trash folder.' ),
 					line: translate( 'Everything you write is solid gold.' )
