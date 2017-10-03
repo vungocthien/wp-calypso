@@ -77,9 +77,11 @@ class PostsList extends Component {
 							{ posts.map( ( post, index ) => (
 								<PostCard
 									key={ index }
-									post={ post }
+									postId={ post.id }
+									postTitle={ post.title }
+									siteId={ post.siteId }
 									remove={ this.removePost( fields, index ) } />
-							)	) }
+							) ) }
 						</SortableList>
 					</FormFieldset>
 				}
