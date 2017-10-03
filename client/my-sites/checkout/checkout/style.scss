@@ -593,6 +593,19 @@
 					width: 66%;
 				}
 			}
+
+			&.is-international-address {
+				.postal-code {
+					 float: left;
+					 width: calc( 33% - 7px );
+				 }
+
+				.city {
+					float: right;
+					width: calc( 66% );
+				}
+			}
+
 		}
 
 		.hidden-input a {
@@ -600,6 +613,10 @@
 			font-size: 12px;
 			margin-top: 5px;
 		}
+	}
+
+	.checkout__domain-details-fieldset {
+		margin-bottom: 0;
 	}
 }
 
