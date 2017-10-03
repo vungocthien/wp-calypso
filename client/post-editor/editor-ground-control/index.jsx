@@ -6,7 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { identity, noop } from 'lodash';
+import { get, identity, noop } from 'lodash';
 import moment from 'moment';
 import page from 'page';
 import i18n, { localize } from 'i18n-calypso';
@@ -265,6 +265,8 @@ export class EditorGroundControl extends PureComponent {
 	}
 
 	render() {
+		const hasRevisions = get( this.props.post, 'revisions.length' );
+
 		return (
 			<Card className="editor-ground-control">
 				<Button
@@ -318,10 +320,12 @@ export class EditorGroundControl extends PureComponent {
 						</span>
 					) }
 				</div>
-				<HistoryButton
-					selectRevision={ this.props.selectRevision }
-					setNestedSidebar={ this.props.setNestedSidebar }
-				/>
+				{ hasRevisions &&
+					<HistoryButton
+						selectRevision={ this.props.selectRevision }
+						setNestedSidebar={ this.props.setNestedSidebar }
+					/>
+				}
 				{ this.renderGroundControlActionButtons() }
 			</Card>
 		);
