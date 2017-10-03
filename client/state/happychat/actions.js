@@ -71,7 +71,11 @@ export const sendUserInfo = ( howCanWeHelp, howYouFeel, site ) => {
 	};
 };
 
-export const sendChatMessage = message => ( { type: HAPPYCHAT_SEND_MESSAGE, message } );
+export const sendChatMessage = ( message, meta ) => ( {
+	type: HAPPYCHAT_SEND_MESSAGE,
+	message,
+	meta
+} );
 
 /**
  * Returns an action object to be used in signalling that the current user geo location
