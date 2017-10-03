@@ -114,7 +114,6 @@ module.exports = React.createClass( {
 				</span>
 			),
 			time = this.getTimestamp();
-
 		if ( this.props.link ) {
 			const rel = this.props.target === '_blank' ? 'noopener noreferrer' : null;
 			innerText = (
