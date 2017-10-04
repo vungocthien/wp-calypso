@@ -145,10 +145,6 @@ export class DomainDetailsForm extends PureComponent {
 		return this.state.currentStep !== last( this.state.steps );
 	}
 
-	isInternationalAddress() {
-		return ! includes( CHECKOUT_US_ADDRESS_FORMAT_COUNTRIES, formState.getFieldValue( this.state.form, 'countryCode' ) );
-	}
-
 	switchToNextStep() {
 		const newStep = this.state.steps[ indexOf( this.state.steps, this.state.currentStep ) + 1 ];
 		debug( 'Switching to step: ' + newStep );
@@ -430,15 +426,13 @@ export class DomainDetailsForm extends PureComponent {
 	}
 
 	renderCountryDependentAddressFields( needsOnlyGoogleAppsDetails ) {
-		const isInternationalAddress = this.isInternationalAddress();
-
+		const { isStateRequiredInAddress } = this.props;
 		return (
 			<div className="checkout__domain-details-country-dependent-address-fields">
 				{ ! needsOnlyGoogleAppsDetails && this.renderAddressFields() }
-				{ isInternationalAddress && this.renderPostalCodeField() }
 				{ ! needsOnlyGoogleAppsDetails && this.renderCityField() }
-				{ ! isInternationalAddress && ! needsOnlyGoogleAppsDetails && this.renderStateField() }
-				{ ! isInternationalAddress && this.renderPostalCodeField() }
+				{ isStateRequiredInAddress && ! needsOnlyGoogleAppsDetails && this.renderStateField() }
+				{ this.renderPostalCodeField() }
 			</div>
 		);
 	}
@@ -542,12 +536,13 @@ export class DomainDetailsForm extends PureComponent {
 	}
 
 	render() {
-		const needsOnlyGoogleAppsDetails = this.needsOnlyGoogleAppsDetails(),
+		const { isStateRequiredInAddress } = this.props,
+			needsOnlyGoogleAppsDetails = this.needsOnlyGoogleAppsDetails(),
 			classSet = classNames( {
 				'domain-details': true,
 				selected: true,
 				'only-google-apps-details': needsOnlyGoogleAppsDetails,
-				'is-international-address': this.isInternationalAddress(),
+				'eu-address': ! isStateRequiredInAddress,
 			} );
 
 		let title;
@@ -591,3 +586,15 @@ export class DomainDetailsFormContainer extends PureComponent {
 export default connect( state => ( { contactDetails: getContactDetailsCache( state ) } ), {
 	updateContactDetailsCache,
 } )( localize( DomainDetailsFormContainer ) );
+export default connect(
+	( state ) => {
+		const contactDetails = getContactDetailsCache( state );
+		// this should be a selector in state/selectors
+		const isStateRequiredInAddress = includes( CHECKOUT_US_ADDRESS_FORMAT_COUNTRIES, ( contactDetails || {} ).countryCode );
+		return {
+			contactDetails,
+			isStateRequiredInAddress
+		};
+	},
+	{ updateContactDetailsCache }
+)( localize( DomainDetailsFormContainer ) );

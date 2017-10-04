@@ -142,6 +142,20 @@ describe( 'Domain Details Form', () => {
 		expect( wrapper.find( 'PrivacyProtection' ) ).to.have.length( 1 );
 	} );
 
+	describe( '#shouldDisplayAddressFieldset', () => {
+		it( 'should return `true` when valid country code exists', () => {
+			const wrapper = shallow( <DomainDetailsForm { ...propsWithCountry } /> );
+
+			expect( wrapper.instance().shouldDisplayAddressFieldset() ).to.be.true;
+		} );
+
+		it( 'should return `false` when valid country code exists', () => {
+			const wrapper = shallow( <DomainDetailsForm { ...defaultProps } /> );
+
+			expect( wrapper.instance().shouldDisplayAddressFieldset() ).to.be.false;
+		} );
+	} );
+
 	describe( 'Country selection', () => {
 		let needsOnlyGoogleAppsDetailsStub;
 
@@ -152,26 +166,20 @@ describe( 'Domain Details Form', () => {
 			);
 		} );
 
-		it( 'should render US address with state field when countryCode is US/AU/CA', () => {
-			[ 'US', 'CA', 'AU' ].forEach( ( countryCode ) => {
-				const wrapper = shallow( <DomainDetailsForm { ...defaultProps } contactDetails={ { countryCode } } /> ),
-					stateInput = wrapper.find( '[name="state"]' );
+		it( 'should render address with state field when countryCode is US/AU/CA', () => {
+			const wrapper = shallow( <DomainDetailsForm { ...propsWithCountry } isStateRequiredInAddress={ true } /> ),
+				stateInput = wrapper.find( '[name="state"]' );
 
-				expect( wrapper.find( 'PaymentBox' ).get( 0 ).props.classSet ).to.not.contain( 'is-international-address' );
-				assert.equal( stateInput.length,
-					1,
-					`For ${ countryCode } [name="state"] should be present` );
-				expect( stateInput.get( 0 ).props.countryCode ).to.equal( countryCode );
-			} );
+			expect( wrapper.find( 'PaymentBox' ).get( 0 ).props.classSet ).to.not.contain( 'eu-address' );
+			expect( stateInput.length ).to.equal( 1 );
+			expect( stateInput.get( 0 ).props.countryCode ).to.equal( 'AU' );
 		} );
 
-		it( 'should render International address format without state field when countryCode is not US/AU/CA', () => {
-			[ 'DE', 'BR', '' ].forEach( ( countryCode ) => {
-				const wrapper = shallow( <DomainDetailsForm { ...defaultProps } contactDetails={ { countryCode } } /> );
+		it( 'should render address without state field when countryCode is not US/AU/CA', () => {
+			const wrapper = shallow( <DomainDetailsForm { ...defaultProps } isStateRequiredInAddress={ false } /> );
 
-				expect( wrapper.find( 'PaymentBox' ).get( 0 ).props.classSet ).to.contain( 'is-international-address' );
-				expect( wrapper.find( '[name="state"]' ) ).to.have.length( 0 );
-			} );
+			expect( wrapper.find( 'PaymentBox' ).get( 0 ).props.classSet ).to.contain( 'eu-address' );
+			expect( wrapper.find( '[name="state"]' ) ).to.have.length( 0 );
 		} );
 
 		it( 'should not render address fieldset with no country data', () => {
