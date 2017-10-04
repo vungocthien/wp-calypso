@@ -6,12 +6,15 @@ import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { localize } from 'i18n-calypso';
+import page from 'page';
 
 /**
  * Internal dependencies
  */
 import Main from 'components/main';
-import { fetchPromotions } from 'woocommerce/state/sites/promotions/actions';
+import { successNotice, errorNotice } from 'state/notices/actions';
+import { getLink } from 'woocommerce/lib/nav-utils';
+import { fetchPromotions, createPromotion } from 'woocommerce/state/sites/promotions/actions';
 import { fetchProductCategories } from 'woocommerce/state/sites/product-categories/actions';
 import { getProductCategories } from 'woocommerce/state/sites/product-categories/selectors';
 import { editPromotion, clearPromotionEdits } from 'woocommerce/state/ui/promotions/actions';
@@ -38,6 +41,10 @@ class PromotionCreate extends React.Component {
 		} ),
 		editPromotion: PropTypes.func.isRequired,
 		clearPromotionEdits: PropTypes.func.isRequired,
+		fetchSettingsGeneral: PropTypes.func.isRequired,
+		fetchPromotions: PropTypes.func.isRequired,
+		fetchProductCategories: PropTypes.func.isRequired,
+		createPromotion: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
@@ -69,14 +76,39 @@ class PromotionCreate extends React.Component {
 	}
 
 	onSave = () => {
-		// TODO: Add action to save promotion.
+		const { site, promotion, translate } = this.props;
+
+		const getSuccessNotice = () => {
+			return successNotice(
+				translate( '%(promotion)s promotion successfully created.', {
+					args: { promotion: promotion.name },
+				} ),
+				{
+					displayOnNextPage: true,
+					duration: 8000,
+				}
+			);
+		};
+
+		const successAction = () => {
+			page.redirect( getLink( '/store/promotions/:site', site ) );
+			return getSuccessNotice( promotion );
+		};
+
+		const failureAction = errorNotice(
+			translate( 'There was a problem saving the %(promotion)s promotion. Please try again.', {
+				args: { promotion: promotion.name },
+			} )
+		);
+
+		this.props.createPromotion( site.ID, promotion, successAction, failureAction );
 	}
 
 	isPromotionValid() {
 		const { promotion } = this.props;
 
-		// TODO: Update with real info.
-		return promotion && promotion.id;
+		// TODO: Update with complete info.
+		return promotion && promotion.id && promotion.type;
 	}
 
 	render() {
@@ -134,6 +166,7 @@ function mapDispatchToProps( dispatch ) {
 			fetchSettingsGeneral,
 			fetchPromotions,
 			fetchProductCategories,
+			createPromotion,
 		},
 		dispatch
 	);
