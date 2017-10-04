@@ -4,7 +4,7 @@
  */
 import { expect } from 'chai';
 import React from 'react';
-import TestUtils from 'react-addons-test-utils';
+import { createRenderer } from 'react-test-renderer/shallow';
 
 /**
  * Internal dependencies
@@ -15,7 +15,7 @@ describe( 'index', function() {
 	let renderer;
 
 	beforeEach( function() {
-		renderer = TestUtils.createRenderer();
+		renderer = createRenderer();
 	} );
 
 	it( 'should render the character count of the passed value', function() {
