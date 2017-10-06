@@ -21,12 +21,27 @@ import Gravatar from 'components/gravatar';
 import FormCheckbox from 'components/forms/form-checkbox';
 import { stripHTML, decodeEntities } from 'lib/formatting';
 import { urlToDomainAndPath } from 'lib/url';
+import { convertDateToUserLocation } from 'components/post-schedule/utils';
+import { gmtOffset, timezone } from 'lib/site/utils';
+// import humanDate from 'lib/human-date';
+
+const getFormattedDate = (
+	commentDate,
+	site //humanDate(
+) =>
+	convertDateToUserLocation(
+		commentDate || new Date(),
+		timezone( site ),
+		gmtOffset( site )
+	).format( 'll LT' );
+//);
 
 export const CommentDetailHeader = ( {
 	authorAvatarUrl,
 	authorDisplayName,
 	authorUrl,
 	commentContent,
+	commentDate,
 	commentIsLiked,
 	commentIsSelected,
 	commentStatus,
@@ -36,6 +51,7 @@ export const CommentDetailHeader = ( {
 	isEditMode,
 	isExpanded,
 	postTitle,
+	site,
 	toggleApprove,
 	toggleEditMode,
 	toggleExpanded,
@@ -115,6 +131,9 @@ export const CommentDetailHeader = ( {
 										},
 									} ) }
 								</Emojify>
+							</div>
+							<div className="comment-detail__author-info-element">
+								{ getFormattedDate( commentDate, site ) }
 							</div>
 						</div>
 					</div>
