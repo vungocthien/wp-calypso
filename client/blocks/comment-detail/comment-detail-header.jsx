@@ -132,7 +132,7 @@ export const CommentDetailHeader = ( {
 									} ) }
 								</Emojify>
 							</div>
-							<div className="comment-detail__author-info-element">
+							<div className="comment-detail__author-info-element is-timestamp">
 								{ getFormattedDate( commentDate, site ) }
 							</div>
 						</div>
