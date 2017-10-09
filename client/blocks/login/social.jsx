@@ -26,19 +26,7 @@ import { recordTracksEvent } from 'state/analytics/actions';
 import WpcomLoginForm from 'signup/wpcom-login-form';
 import { InfoNotice } from 'blocks/global-notice';
 import { login } from 'lib/paths';
-
-function isSafari() {
-	return typeof window !== 'undefined' && window.navigator.userAgent.match( /safari/i );
-}
-
-function shouldUseRedirectFlow() {
-	// If calypso is loaded in a popup, we don't want to open a second popup for social login
-	// let's use the redirect flow instead in that case
-	const isPopup = typeof window !== 'undefined' && window.opener && window.opener !== window;
-	// also disable the popup flow for all safari versions
-	// See https://github.com/google/google-api-javascript-client/issues/297#issuecomment-333869742
-	return isPopup || isSafari();
-}
+import { shouldUseLoginRedirectFlow } from 'lib/user/utils';
 
 class SocialLoginForm extends Component {
 	static propTypes = {
@@ -148,7 +136,7 @@ class SocialLoginForm extends Component {
 
 	render() {
 		const { redirectTo } = this.props;
-		const redirectUri = shouldUseRedirectFlow()
+		const redirectUri = shouldUseLoginRedirectFlow()
 			? `https://${ ( typeof window !== 'undefined' && window.location.host ) +
 					login( { isNative: true, socialService: 'google' } ) }`
 			: null;
