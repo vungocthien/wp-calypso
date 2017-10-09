@@ -1,7 +1,14 @@
 /**
  * External dependencies
  */
-import { isEmpty, find, values } from 'lodash';
+import {
+	drop,
+	isEmpty,
+	join,
+	find,
+	split,
+	values
+} from 'lodash';
 
 /**
  * Internal dependencies
@@ -53,7 +60,28 @@ function getDomainNameFromReceiptOrCart( receipt, cart ) {
 	return null;
 }
 
+function getWpcomTldsCachedList() {
+	return require( './tlds/wpcom-tlds.json' );
+}
+
+function parseDomainAgainstTldList( domainFragment, tldList ) {
+	if ( ! domainFragment ) {
+		return '';
+	}
+
+	if ( tldList[ domainFragment ] ) {
+		return domainFragment;
+	}
+
+	const parts = split( domainFragment, '.' );
+	const suffix = join( drop( parts ), '.' );
+
+	return parseDomainAgainstTldList( suffix, tldList );
+}
+
 export {
 	getDomainNameFromReceiptOrCart,
 	getDomainType,
+	getWpcomTldsCachedList,
+	parseDomainAgainstTldList,
 };
