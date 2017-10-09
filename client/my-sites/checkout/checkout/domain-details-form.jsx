@@ -1,3 +1,5 @@
+/*eslint-disable*/
+
 /**
  * External dependencies
  *
@@ -55,8 +57,9 @@ import ExtraInfoForm, {
 	tldsWithAdditionalDetailsForms,
 } from 'components/domains/registrant-extra-info';
 import config from 'config';
-import { CHECKOUT_US_ADDRESS_FORMAT_COUNTRIES } from 'my-sites/checkout/constants';
-
+import { CHECKOUT_EU_ADDRESS_FORMAT_COUNTRY_CODES } from 'my-sites/checkout/constants';
+import UsAddressFields from 'components/domains/domain-contact-form/us-address-fields';
+import UsAddressFieldsRender from 'components/domains/domain-contact-form/us-address-fields-render';
 const debug = debugFactory( 'calypso:my-sites:upgrades:checkout:domain-details' );
 const wpcom = wp.undocumented(),
 	countriesList = countriesListForDomainRegistrations();
@@ -177,6 +180,7 @@ export class DomainDetailsForm extends PureComponent {
 	}
 
 	setFormState = form => {
+		// eslint-disable-next-line
 		if ( ! this.needsFax() ) {
 			delete form.fax;
 		}
@@ -248,8 +252,8 @@ export class DomainDetailsForm extends PureComponent {
 		return cartItems.getDomainRegistrations( this.props.cart ).length;
 	}
 
-	getFieldProps( name ) {
-		const ref = name === 'state' ? { inputRef: this.getInputRefCallback( name ) } : { ref: name };
+	getFieldProps( name, needsChildRef ) {
+		const ref = needsChildRef ? { inputRef: this.getInputRefCallback( name ) } : { ref: name };
 		return {
 			name,
 			...ref,
@@ -381,7 +385,7 @@ export class DomainDetailsForm extends PureComponent {
 		);
 	}
 
-	renderAddressFields() {
+	renderAddressFields = () => {
 		return (
 			<div>
 				<Input
@@ -398,13 +402,13 @@ export class DomainDetailsForm extends PureComponent {
 				/>
 			</div>
 		);
-	}
+	};
 
-	renderCityField() {
+	renderCityField = () => {
 		return <Input label={ this.props.translate( 'City' ) } { ...this.getFieldProps( 'city' ) } />;
-	}
+	};
 
-	renderStateField() {
+	renderStateField = () => {
 		const countryCode = formState.getFieldValue( this.state.form, 'countryCode' );
 
 		return (
@@ -414,16 +418,16 @@ export class DomainDetailsForm extends PureComponent {
 				{ ...this.getFieldProps( 'state' ) }
 			/>
 		);
-	}
+	};
 
-	renderPostalCodeField() {
+	renderPostalCodeField = () => {
 		return (
 			<Input
 				label={ this.props.translate( 'Postal Code' ) }
 				{ ...this.getFieldProps( 'postal-code' ) }
 			/>
 		);
-	}
+	};
 
 	renderCountryDependentAddressFields( needsOnlyGoogleAppsDetails ) {
 		const { isStateRequiredInAddress } = this.props;
@@ -438,16 +442,40 @@ export class DomainDetailsForm extends PureComponent {
 	}
 
 	renderDetailsForm( needsOnlyGoogleAppsDetails ) {
+		// UsDomainContactForm
+		// props
+		// countryCode: formState.getFieldValue( this.state.form, 'countryCode' )
+		// countriesList
+		// phoneCountryCode
+		// handlePhoneChange
+		// needsFax
+		// getFieldProps
+		// numberOfDomainRegistrations: this.getNumberOfDomainRegistrations
+		const { contactDetails, translate } = this.props,
+			countryCode = ( contactDetails || {} ).countryCode;
+		// see below: this.getFieldProps.bind( this )
+		// this is an anti-pattern, but we need to bind context every time
 		return (
 			<form>
 				{ this.renderNameFields() }
 				{ ! needsOnlyGoogleAppsDetails && this.renderOrganizationField() }
 				{ ! needsOnlyGoogleAppsDetails && this.renderEmailField() }
 				{ ! needsOnlyGoogleAppsDetails && this.renderPhoneField() }
-				{ this.renderCountryField() }
 				{ ! needsOnlyGoogleAppsDetails && this.needsFax() && this.renderFaxField() }
-				{ this.shouldDisplayAddressFieldset() &&
-					this.renderCountryDependentAddressFields( needsOnlyGoogleAppsDetails ) }
+				{ /*{ this.shouldDisplayAddressFieldset() &&*/ }
+				{ /*this.renderCountryDependentAddressFields( needsOnlyGoogleAppsDetails ) }*/ }
+				{ /*
+					<UsAddressFields getFieldProps={ this.getFieldProps.bind( this ) } translate={ translate } countryCode={ countryCode } />
+*/ }
+				<UsAddressFieldsRender
+					renderMethodArray={ [
+						this.renderAddressFields,
+						this.renderCityField,
+						this.renderStateField,
+						this.renderPostalCodeField,
+					] }
+				/>
+				{ this.renderCountryField() }
 				{ this.renderSubmitButton() }
 			</form>
 		);
@@ -522,7 +550,10 @@ export class DomainDetailsForm extends PureComponent {
 	// We want to cache the functions to avoid triggering unnecessary rerenders
 	getInputRefCallback( name ) {
 		if ( ! this.inputRefCallbacks[ name ] ) {
-			this.inputRefCallbacks[ name ] = el => ( this.inputRefs[ name ] = el );
+			this.inputRefCallbacks[ name ] = el => {
+				this.inputRefs[ name ] = el;
+				return this.inputRefs[ name ];
+			};
 		}
 
 		return this.inputRefCallbacks[ name ];
@@ -542,7 +573,6 @@ export class DomainDetailsForm extends PureComponent {
 				'domain-details': true,
 				selected: true,
 				'only-google-apps-details': needsOnlyGoogleAppsDetails,
-				'eu-address': ! isStateRequiredInAddress,
 			} );
 
 		let title;
@@ -583,17 +613,11 @@ export class DomainDetailsFormContainer extends PureComponent {
 	}
 }
 
-export default connect( state => ( { contactDetails: getContactDetailsCache( state ) } ), {
-	updateContactDetailsCache,
-} )( localize( DomainDetailsFormContainer ) );
 export default connect(
-	( state ) => {
+	state => {
 		const contactDetails = getContactDetailsCache( state );
-		// this can one day be a selector in state/selectors if we need it elsewhere
-		const isStateRequiredInAddress = includes( CHECKOUT_US_ADDRESS_FORMAT_COUNTRIES, ( contactDetails || {} ).countryCode );
 		return {
 			contactDetails,
-			isStateRequiredInAddress
 		};
 	},
 	{ updateContactDetailsCache }
