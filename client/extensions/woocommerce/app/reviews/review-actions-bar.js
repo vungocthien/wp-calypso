@@ -1,6 +1,9 @@
 /**
  * External dependencies
+ *
+ * @format
  */
+
 import React from 'react';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
@@ -39,11 +42,7 @@ const ReviewActionsBar = ( {
 				className={ classNames( 'reviews__action-approve', { 'is-approved': isApproved } ) }
 			>
 				<Gridicon icon={ isApproved ? 'checkmark-circle' : 'checkmark' } />
-				<span>{
-					isApproved
-						? translate( 'Approved' )
-						: translate( 'Approve' )
-				}</span>
+				<span>{ isApproved ? translate( 'Approved' ) : translate( 'Approve' ) }</span>
 			</Button>
 
 			<Button
@@ -52,30 +51,22 @@ const ReviewActionsBar = ( {
 				className={ classNames( 'reviews__action-spam', { 'is-spam': isSpam } ) }
 			>
 				<Gridicon icon="spam" />
-				<span>{
-					isSpam
-						? translate( 'Marked as Spam' )
-						: translate( 'Spam' )
-				}</span>
+				<span>{ isSpam ? translate( 'Marked as Spam' ) : translate( 'Spam' ) }</span>
 			</Button>
 
-			{ 'trash' === currentStatus && (
+			{ ( 'trash' === currentStatus && (
 				<Button borderless className="reviews__action-delete" onClick={ deleteTheReview }>
 					<Gridicon icon="trash" />
 					<span>{ translate( 'Delete Permanently' ) }</span>
 				</Button>
-			) || (
+			) ) || (
 				<Button
 					borderless
 					onClick={ trashReview }
 					className={ classNames( 'reviews__action-trash', { 'is-trash': isTrash } ) }
 				>
 					<Gridicon icon="trash" />
-					<span>{
-						isTrash
-							? translate( 'Trashed' )
-							: translate( 'Trash' )
-					}</span>
+					<span>{ isTrash ? translate( 'Trashed' ) : translate( 'Trash' ) }</span>
 				</Button>
 			) }
 		</div>
@@ -92,21 +83,21 @@ ReviewActionsBar.propTypes = {
 };
 
 const mapDispatchToProps = ( dispatch, ownProps ) => {
-	const { review, siteId, currentStatus, toggleExpanded } = ownProps;
+	const { review, siteId, toggleExpanded } = ownProps;
 	const { product } = review;
 	const postId = product.id;
 	const commentId = review.id;
 	return {
 		approveReview: () => {
-			dispatch( changeReviewStatus( siteId, postId, commentId, currentStatus, 'approved' ) );
+			dispatch( changeReviewStatus( siteId, postId, commentId, review.status, 'approved' ) );
 			toggleExpanded();
 		},
 		unapproveReview: () => {
-			dispatch( changeReviewStatus( siteId, postId, commentId, currentStatus, 'pending' ) );
+			dispatch( changeReviewStatus( siteId, postId, commentId, review.status, 'pending' ) );
 			toggleExpanded();
 		},
 		trashReview: () => {
-			dispatch( changeReviewStatus( siteId, postId, commentId, currentStatus, 'trash' ) );
+			dispatch( changeReviewStatus( siteId, postId, commentId, review.status, 'trash' ) );
 			toggleExpanded();
 		},
 		deleteTheReview: () => {
@@ -114,9 +105,9 @@ const mapDispatchToProps = ( dispatch, ownProps ) => {
 			toggleExpanded();
 		},
 		spamReview: () => {
-			dispatch( changeReviewStatus( siteId, postId, commentId, currentStatus, 'spam' ) );
+			dispatch( changeReviewStatus( siteId, postId, commentId, review.status, 'spam' ) );
 			toggleExpanded();
-		}
+		},
 	};
 };
 

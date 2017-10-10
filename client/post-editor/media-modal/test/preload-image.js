@@ -1,4 +1,9 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
 import { expect } from 'chai';
@@ -6,15 +11,13 @@ import { expect } from 'chai';
 /**
  * Internal dependencies
  */
-import useFakeDom from 'test/helpers/use-fake-dom';
-import { useSandbox } from 'test/helpers/use-sinon';
 import preloadImage from '../preload-image';
+import { useSandbox } from 'test/helpers/use-sinon';
 
 describe( '#preloadImage()', function() {
 	let sandbox, Image;
 
-	useFakeDom();
-	useSandbox( ( newSandbox ) => {
+	useSandbox( newSandbox => {
 		sandbox = newSandbox;
 		Image = sandbox.stub( global.window, 'Image' );
 	} );

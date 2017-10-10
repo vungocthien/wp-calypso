@@ -9,6 +9,7 @@ import addQueryArgs from 'lib/route/add-query-args';
 import debugModule from 'debug';
 import page from 'page';
 import { localize } from 'i18n-calypso';
+import { get, startsWith } from 'lodash';
 
 /**
  * Internal dependencies
@@ -19,6 +20,7 @@ import FormLabel from 'components/forms/form-label';
 import FormSettingExplanation from 'components/forms/form-setting-explanation';
 import Gravatar from 'components/gravatar';
 import HelpButton from './help-button';
+import JetpackConnectHappychatButton from './happychat-button';
 import JetpackConnectNotices from './jetpack-connect-notices';
 import LoggedOutFormFooter from 'components/logged-out-form/footer';
 import LoggedOutFormLinkItem from 'components/logged-out-form/link-item';
@@ -51,7 +53,7 @@ class LoggedInForm extends Component {
 		isFetchingSites: PropTypes.bool,
 		isFetchingAuthorizationSite: PropTypes.bool,
 		isSSO: PropTypes.bool,
-		isWCS: PropTypes.bool,
+		isWoo: PropTypes.bool,
 		jetpackConnectAuthorize: PropTypes.shape( {
 			authorizeError: PropTypes.oneOfType( [ PropTypes.object, PropTypes.bool ] ),
 			authorizeSuccess: PropTypes.bool,
@@ -79,14 +81,17 @@ class LoggedInForm extends Component {
 	componentWillMount() {
 		const { queryObject, autoAuthorize } = this.props.jetpackConnectAuthorize;
 		this.props.recordTracksEvent( 'calypso_jpc_auth_view' );
-		if (
+
+		const doAutoAuthorize =
 			! this.props.isAlreadyOnSitesList &&
 			! queryObject.already_authorized &&
 			( this.props.calypsoStartedConnection ||
-				this.props.isSSO ||
 				queryObject.new_user_started_connection ||
-				autoAuthorize )
-		) {
+				autoAuthorize );
+
+		// isSSO is a separate case from the rest since we have already validated
+		// it in authorize-form.jsx. Therefore, if it's set, just authorize and redirect.
+		if ( this.props.isSSO || doAutoAuthorize ) {
 			debug( 'Authorizing automatically on component mount' );
 			this.setState( { haveAuthorized: true } );
 			return this.props.authorize( queryObject );
@@ -104,7 +109,7 @@ class LoggedInForm extends Component {
 
 		// For SSO, WooCommerce Services, and JPO users, do not display plans page
 		// Instead, redirect back to admin as soon as we're connected
-		if ( props.isSSO || props.isWCS || ( queryObject && 'jpo' === queryObject.from ) ) {
+		if ( props.isSSO || props.isWoo || this.isFromJpo( props ) ) {
 			if ( ! isRedirectingToWpAdmin && authorizeSuccess ) {
 				return this.props.goBackToWpAdmin( queryObject.redirect_after_auth );
 			}
@@ -154,7 +159,7 @@ class LoggedInForm extends Component {
 	redirect() {
 		const { queryObject } = this.props.jetpackConnectAuthorize;
 
-		if ( 'jpo' === queryObject.from || this.props.isSSO || this.props.isWCS ) {
+		if ( this.props.isSSO || this.props.isWoo || this.isFromJpo( this.props ) ) {
 			debug(
 				'Going back to WP Admin.',
 				'Connection initiated via: ',
@@ -166,6 +171,10 @@ class LoggedInForm extends Component {
 		} else {
 			page.redirect( this.getRedirectionTarget() );
 		}
+	}
+
+	isFromJpo( props ) {
+		return startsWith( get( props, [ 'jetpackConnectAuthorize', 'queryObject', 'from' ] ), 'jpo' );
 	}
 
 	handleClickDisclaimer = () => {
@@ -495,7 +504,9 @@ class LoggedInForm extends Component {
 				<LoggedOutFormLinkItem onClick={ this.handleSignOut }>
 					{ translate( 'Create a new account' ) }
 				</LoggedOutFormLinkItem>
-				<HelpButton onClick={ this.handleClickHelp } />
+				<JetpackConnectHappychatButton>
+					<HelpButton onClick={ this.handleClickHelp } />
+				</JetpackConnectHappychatButton>
 			</LoggedOutFormLinks>
 		);
 	}

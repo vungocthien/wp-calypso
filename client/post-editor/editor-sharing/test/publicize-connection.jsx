@@ -1,16 +1,29 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
-import { noop } from 'lodash';
+import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { expect } from 'chai';
 
 /**
  * Internal dependencies
  */
-import useFakeDom from 'test/helpers/use-fake-dom';
-import useMockery from 'test/helpers/use-mockery';
+import { EditorSharingPublicizeConnection as PublicizeConnection } from '../publicize-connection';
+
+jest.mock( 'lib/posts/actions', () => ( {
+	recordEvent: () => {},
+	deleteMetadata: () => {},
+	updateMetadata: () => {},
+} ) );
+jest.mock( 'lib/posts/stats', () => ( {
+	recordEvent: () => {},
+	recordState: () => {},
+} ) );
 
 /**
  * Module variables
@@ -21,42 +34,19 @@ var CONNECTION = {
 	external_display: '@dev_press',
 	keyring_connection_ID: 9903589,
 	service: 'twitter',
-	label: 'Twitter'
+	label: 'Twitter',
 };
 
 describe( 'PublicizeConnection', function() {
-	let PublicizeConnection;
-
-	useFakeDom();
-
-	useMockery( mockery => {
-		mockery.registerMock( 'lib/posts/actions', {
-			deleteMetadata: noop,
-			updateMetadata: noop
-		} );
-		mockery.registerMock( 'lib/posts/stats', {
-			recordEvent: noop,
-			recordState: noop
-		} );
-
-		PublicizeConnection = require( '../publicize-connection' );
-	} );
-
 	describe( '#isConnectionSkipped()', function() {
 		it( 'should return true if connection is already skipped', function() {
 			var post, tree;
 
 			post = {
-				metadata: [
-					{ id: 1234, key: '_wpas_skip_9903589', value: '1' }
-				]
+				metadata: [ { id: 1234, key: '_wpas_skip_9903589', value: '1' } ],
 			};
 
-			tree = shallow(
-				<PublicizeConnection
-					post={ post }
-					connection={ CONNECTION } />
-			).instance();
+			tree = shallow( <PublicizeConnection post={ post } connection={ CONNECTION } /> ).instance();
 
 			expect( tree.isConnectionSkipped() ).to.equal( true );
 		} );
@@ -67,15 +57,11 @@ describe( 'PublicizeConnection', function() {
 			post = {
 				metadata: [
 					{ id: 1234, key: '_wpas_skip_1234', value: '1' },
-					{ id: 12345, key: '_wpas_done_9903589', value: '1' }
-				]
+					{ id: 12345, key: '_wpas_done_9903589', value: '1' },
+				],
 			};
 
-			tree = shallow(
-				<PublicizeConnection
-					post={ post }
-					connection={ CONNECTION } />
-			).instance();
+			tree = shallow( <PublicizeConnection post={ post } connection={ CONNECTION } /> ).instance();
 
 			expect( tree.isConnectionSkipped() ).to.equal( false );
 		} );
@@ -86,16 +72,10 @@ describe( 'PublicizeConnection', function() {
 			var post, tree;
 
 			post = {
-				metadata: [
-					{ id: 1234, key: '_wpas_done_9903589', value: '1' }
-				]
+				metadata: [ { id: 1234, key: '_wpas_done_9903589', value: '1' } ],
 			};
 
-			tree = shallow(
-				<PublicizeConnection
-					post={ post }
-					connection={ CONNECTION } />
-			).instance();
+			tree = shallow( <PublicizeConnection post={ post } connection={ CONNECTION } /> ).instance();
 
 			expect( tree.isConnectionDone() ).to.equal( true );
 		} );
@@ -106,15 +86,11 @@ describe( 'PublicizeConnection', function() {
 			post = {
 				metadata: [
 					{ id: 1234, key: '_wpas_done_1234', value: '1' },
-					{ id: 12345, key: '_wpas_skip_9903589', value: '1' }
-				]
+					{ id: 12345, key: '_wpas_skip_9903589', value: '1' },
+				],
 			};
 
-			tree = shallow(
-				<PublicizeConnection
-					post={ post }
-					connection={ CONNECTION } />
-			).instance();
+			tree = shallow( <PublicizeConnection post={ post } connection={ CONNECTION } /> ).instance();
 
 			expect( tree.isConnectionDone() ).to.equal( false );
 		} );

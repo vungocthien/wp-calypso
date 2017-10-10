@@ -1,16 +1,16 @@
 /**
  * External dependencies
+ *
+ * @format
  */
+
 import moment from 'moment';
-import {
-	has,
-	isEmpty,
-	throttle
-} from 'lodash';
+import { has, isEmpty, throttle } from 'lodash';
 
 /**
  * Internal dependencies
  */
+import config from 'config';
 import wpcom from 'lib/wp';
 import {
 	ANALYTICS_EVENT_RECORD,
@@ -22,7 +22,6 @@ import {
 	HAPPYCHAT_TRANSCRIPT_REQUEST,
 	HELP_CONTACT_FORM_SITE_SELECT,
 	ROUTE_SET,
-
 	COMMENTS_CHANGE_STATUS,
 	EXPORT_COMPLETE,
 	EXPORT_FAILURE,
@@ -40,18 +39,7 @@ import {
 	PURCHASE_REMOVE_COMPLETED,
 	SITE_SETTINGS_SAVE_SUCCESS,
 } from 'state/action-types';
-import {
-	receiveChatEvent,
-	receiveChatTranscript,
-	requestChatTranscript,
-	setConnected,
-	setConnecting,
-	setDisconnected,
-	setHappychatAvailable,
-	setHappychatChatStatus,
-	setReconnecting,
-	setGeoLocation,
-} from './actions';
+import { receiveChatTranscript } from './actions';
 import {
 	isHappychatConnectionUninitialized,
 	wasHappychatRecentlyActive,
@@ -60,38 +48,42 @@ import {
 	getGeoLocation,
 	getGroups,
 } from './selectors';
-import {
-	getCurrentUser,
-	getCurrentUserLocale,
-} from 'state/current-user/selectors';
+import { getCurrentUser, getCurrentUserLocale } from 'state/current-user/selectors';
 import { getHelpSelectedSite } from 'state/help/selectors';
+import debugFactory from 'debug';
+const debug = debugFactory( 'calypso:happychat:actions' );
 
-const debug = require( 'debug' )( 'calypso:happychat:actions' );
-
-const sendTyping = throttle( ( connection, message ) => {
-	connection.typing( message );
-}, 1000, { leading: true, trailing: false } );
+const sendTyping = throttle(
+	( connection, message ) => {
+		connection.typing( message );
+	},
+	1000,
+	{ leading: true, trailing: false }
+);
 
 // Promise based interface for wpcom.request
-const request = ( ... args ) => new Promise( ( resolve, reject ) => {
-	wpcom.request( ... args, ( error, response ) => {
-		if ( error ) {
-			return reject( error );
-		}
-		resolve( response );
+const request = ( ...args ) =>
+	new Promise( ( resolve, reject ) => {
+		wpcom.request( ...args, ( error, response ) => {
+			if ( error ) {
+				return reject( error );
+			}
+			resolve( response );
+		} );
 	} );
-} );
 
-const sign = ( payload ) => request( {
-	method: 'POST',
-	path: '/jwt/sign',
-	body: { payload: JSON.stringify( payload ) }
-} );
+const sign = payload =>
+	request( {
+		method: 'POST',
+		path: '/jwt/sign',
+		body: { payload: JSON.stringify( payload ) },
+	} );
 
-const startSession = () => request( {
-	method: 'POST',
-	path: '/happychat/session'
-} );
+const startSession = () =>
+	request( {
+		method: 'POST',
+		path: '/happychat/session',
+	} );
 
 export const updateChatPreferences = ( connection, { getState }, siteId ) => {
 	const state = getState();
@@ -111,57 +103,41 @@ export const connectChat = ( connection, { getState, dispatch } ) => {
 		return;
 	}
 
+	const url = config( 'happychat_url' );
+
 	const user = getCurrentUser( state );
 	const locale = getCurrentUserLocale( state );
 	let groups = getGroups( state );
-
-	// update the chat locale and groups when happychat is initialized
 	const selectedSite = getHelpSelectedSite( state );
 	if ( selectedSite && selectedSite.ID ) {
 		groups = getGroups( state, selectedSite.ID );
 	}
 
-	// Notify that a new connection is being established
-	dispatch( setConnecting() );
+	const happychatUser = {
+		signer_user_id: user.ID,
+		locale,
+		groups,
+	};
 
-	debug( 'opening with chat locale', locale );
-
-	// Before establishing a connection, set up connection handlers
-	connection
-		.on( 'connected', () => {
-			dispatch( setConnected() );
-
-			// TODO: There's no need to dispatch a separate action to request a transcript.
-			// The HAPPYCHAT_CONNECTED action should have its own middleware handler that does this.
-			dispatch( requestChatTranscript() );
-		} )
-		.on( 'disconnect', reason => dispatch( setDisconnected( reason ) ) )
-		.on( 'reconnecting', () => dispatch( setReconnecting() ) )
-		.on( 'message', event => dispatch( receiveChatEvent( event ) ) )
-		.on( 'status', status => dispatch( setHappychatChatStatus( status ) ) )
-		.on( 'accept', accept => dispatch( setHappychatAvailable( accept ) ) );
-
-	// create new session id and get signed identity data for authenticating
 	return startSession()
 		.then( ( { session_id, geo_location } ) => {
-			if ( geo_location && geo_location.country_long && geo_location.city ) {
-				dispatch( setGeoLocation( geo_location ) );
-			}
-
+			happychatUser.geo_location = geo_location;
 			return sign( { user, session_id } );
 		} )
-		.then( ( { jwt } ) => connection.open( user.ID, jwt, locale, groups ) )
-		.catch( e => debug( 'failed to start happychat session', e, e.stack ) );
+		.then( ( { jwt } ) => connection.init( url, dispatch, { jwt, ...happychatUser } ) )
+		.catch( e => debug( 'failed to start Happychat session', e, e.stack ) );
 };
 
 export const requestTranscript = ( connection, { dispatch } ) => {
 	debug( 'requesting current session transcript' );
 
 	// passing a null timestamp will request the latest session's transcript
-	return connection.transcript( null ).then(
-		result => dispatch( receiveChatTranscript( result.messages, result.timestamp ) ),
-		e => debug( 'failed to get transcript', e )
-	);
+	return connection
+		.transcript( null )
+		.then(
+			result => dispatch( receiveChatTranscript( result.messages, result.timestamp ) ),
+			e => debug( 'failed to get transcript', e )
+		);
 };
 
 const onMessageChange = ( connection, message ) => {
@@ -189,23 +165,23 @@ export const sendInfo = ( connection, { getState }, action ) => {
 	};
 
 	// add screen size
-	if ( 'object' === typeof ( screen ) ) {
+	if ( 'object' === typeof screen ) {
 		info.screenSize = {
 			width: screen.width,
-			height: screen.height
+			height: screen.height,
 		};
 	}
 
 	// add browser size
-	if ( 'object' === typeof ( window ) ) {
+	if ( 'object' === typeof window ) {
 		info.browserSize = {
 			width: window.innerWidth,
-			height: window.innerHeight
+			height: window.innerHeight,
 		};
 	}
 
 	// add user agent
-	if ( 'object' === typeof ( navigator ) ) {
+	if ( 'object' === typeof navigator ) {
 		info.userAgent = navigator.userAgent;
 	}
 
@@ -222,20 +198,22 @@ export const sendInfo = ( connection, { getState }, action ) => {
 
 export const connectIfRecentlyActive = ( connection, store ) => {
 	if ( wasHappychatRecentlyActive( store.getState() ) ) {
-		connectChat( connection, store );
+		return connectChat( connection, store );
 	}
+	return Promise.resolve(); // for testing purposes we need to return a promise
 };
 
-export const sendRouteSetEventMessage = ( connection, { getState }, action ) =>{
+export const sendRouteSetEventMessage = ( connection, { getState }, action ) => {
 	const state = getState();
 	const currentUser = getCurrentUser( state );
-	if ( isHappychatClientConnected( state ) &&
-		isHappychatChatAssigned( state ) ) {
-		connection.sendEvent( `Looking at https://wordpress.com${ action.path }?support_user=${ currentUser.username }` );
+	if ( isHappychatClientConnected( state ) && isHappychatChatAssigned( state ) ) {
+		connection.sendEvent(
+			`Looking at https://wordpress.com${ action.path }?support_user=${ currentUser.username }`
+		);
 	}
 };
 
-export const getEventMessageFromActionData = ( action ) => {
+export const getEventMessageFromActionData = action => {
 	// Below we've stubbed in the actions we think we'll care about, so that we can
 	// start incrementally adding messages for them.
 	switch ( action.type ) {
@@ -251,11 +229,11 @@ export const getEventMessageFromActionData = ( action ) => {
 			return 'Stopped looking at Happychat';
 		case HAPPYCHAT_FOCUS:
 			return 'Started looking at Happychat';
-		case IMPORTS_IMPORT_START:	// This one seems not to fire at all.
+		case IMPORTS_IMPORT_START: // This one seems not to fire at all.
 			return null;
 		case JETPACK_CONNECT_AUTHORIZE:
 			return null;
-		case MEDIA_DELETE:	// This one seems not to fire at all.
+		case MEDIA_DELETE: // This one seems not to fire at all.
 			return null;
 		case PLUGIN_ACTIVATE_REQUEST:
 			return null;
@@ -295,10 +273,7 @@ export const getEventMessageFromTracksData = ( { name, properties } ) => {
 
 export const sendAnalyticsLogEvent = ( connection, { meta: { analytics: analyticsMeta } } ) => {
 	analyticsMeta.forEach( ( { type, payload: { service, name, properties } } ) => {
-		if (
-			type === ANALYTICS_EVENT_RECORD &&
-			service === 'tracks'
-		) {
+		if ( type === ANALYTICS_EVENT_RECORD && service === 'tracks' ) {
 			// Check if this event should generate a timeline event, and send it if so
 			const eventMessage = getEventMessageFromTracksData( { name, properties } );
 			if ( eventMessage ) {
@@ -372,6 +347,7 @@ export default function( connection = null ) {
 			case HAPPYCHAT_TRANSCRIPT_REQUEST:
 				requestTranscript( connection, store );
 				break;
+
 			case ROUTE_SET:
 				sendRouteSetEventMessage( connection, store, action );
 				break;

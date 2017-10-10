@@ -1,37 +1,20 @@
+/** @format */
 /**
  * External dependencies
  */
 import { expect } from 'chai';
-import mockery from 'mockery';
-import sinon from 'sinon';
 
 /**
  * Internal dependencies
  */
-import useMockery from 'test/helpers/use-mockery';
+import { addLocaleQueryParam, bindState, getLocale, injectLocalization, setLocale } from '../';
+import { getCurrentUserLocale as getCurrentUserLocaleMock } from 'state/current-user/selectors';
+
+jest.mock( 'state/current-user/selectors', () => ( {
+	getCurrentUserLocale: jest.fn(),
+} ) );
 
 describe( 'index', () => {
-	let getCurrentUserLocaleMock, addLocaleQueryParam,
-		injectLocalization, bindState, setLocale, getLocale;
-
-	useMockery();
-
-	before( () => {
-		// Mock user locale state selector
-		mockery.registerMock( 'state/current-user/selectors', {
-			getCurrentUserLocale: () => getCurrentUserLocaleMock()
-		} );
-
-		// Prepare module for rewiring
-		( {
-			addLocaleQueryParam,
-			injectLocalization,
-			bindState,
-			setLocale,
-			getLocale
-		} = require( '../' ) );
-	} );
-
 	beforeEach( () => {
 		setLocale( undefined );
 	} );
@@ -55,7 +38,7 @@ describe( 'index', () => {
 			const params = addLocaleQueryParam( { query: 'search=foo' } );
 
 			expect( params ).to.eql( {
-				query: 'search=foo&locale=fr'
+				query: 'search=foo&locale=fr',
 			} );
 		} );
 	} );
@@ -76,13 +59,13 @@ describe( 'index', () => {
 			expect( wpcom.request ).to.not.equal( request );
 		} );
 
-		it( 'should modify params by default', ( done ) => {
+		it( 'should modify params by default', done => {
 			setLocale( 'fr' );
 			const wpcom = {
 				request( params ) {
 					expect( params.query ).to.equal( 'search=foo&locale=fr' );
 					done();
-				}
+				},
 			};
 
 			injectLocalization( wpcom );
@@ -92,7 +75,7 @@ describe( 'index', () => {
 
 	describe( '#bindState()', () => {
 		it( 'should set initial locale from state', () => {
-			getCurrentUserLocaleMock = sinon.stub().returns( 'fr' );
+			getCurrentUserLocaleMock.mockReturnValueOnce( 'fr' );
 			bindState( { subscribe() {}, getState() {} } );
 			expect( getLocale() ).to.equal( 'fr' );
 		} );
@@ -103,9 +86,9 @@ describe( 'index', () => {
 				subscribe( _listener ) {
 					listener = _listener;
 				},
-				getState() {}
+				getState() {},
 			} );
-			getCurrentUserLocaleMock = sinon.stub().returns( 'de' );
+			getCurrentUserLocaleMock.mockReturnValueOnce( 'de' );
 			listener();
 
 			expect( getLocale() ).to.equal( 'de' );

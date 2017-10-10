@@ -1,6 +1,11 @@
 /**
  * External dependencies
+ *
+ * @format
  */
+
+import PropTypes from 'prop-types';
+import { localize } from 'i18n-calypso';
 import React from 'react';
 
 /**
@@ -10,15 +15,15 @@ import ProgressBar from 'components/progress-bar';
 import Rating from 'components/rating';
 import analytics from 'lib/analytics';
 
-export default React.createClass( {
+export default localize(React.createClass({
 	displayName: 'PluginRatings',
 
 	propTypes: {
-		rating: React.PropTypes.number,
-		ratings: React.PropTypes.oneOfType( [ React.PropTypes.object, React.PropTypes.array ] ),
-		downloaded: React.PropTypes.number,
-		slug: React.PropTypes.string,
-		numRatings: React.PropTypes.number
+		rating: PropTypes.number,
+		ratings: PropTypes.oneOfType( [ PropTypes.object, PropTypes.array ] ),
+		downloaded: PropTypes.number,
+		slug: PropTypes.string,
+		numRatings: PropTypes.number,
 	},
 
 	ratingTiers: [ 5, 4, 3, 2, 1 ],
@@ -33,25 +38,26 @@ export default React.createClass( {
 	},
 
 	renderPlaceholder() {
-		return ( // eslint-disable-next-line
-			<div className="plugin-ratings is-placeholder">
+		return (
+            // eslint-disable-next-line
+            <div className="plugin-ratings is-placeholder">
 				<div className="plugin-ratings__rating-stars">
 					<Rating rating={ 0 } />
 				</div>
-				<div className="plugin-ratings__rating-text">{ this.translate( 'Based on' ) }</div>
+				<div className="plugin-ratings__rating-text">{ this.props.translate( 'Based on' ) }</div>
 			</div>
-		);
+        );
 	},
 
 	renderRatingTier( ratingTier ) {
 		const { ratings, slug, numRatings } = this.props;
-		const numberOfRatings = ( ratings && ratings[ ratingTier ] ) ? ratings[ ratingTier ] : 0;
+		const numberOfRatings = ratings && ratings[ ratingTier ] ? ratings[ ratingTier ] : 0;
 		const onClickPluginRatingsLink = () => {
 			analytics.ga.recordEvent( 'Plugins', 'Clicked Plugin Ratings Link', 'Plugin Name', slug );
 		};
 
 		return (
-			<a
+            <a
 				className="plugin-ratings__rating-container"
 				key={ `plugins-ratings__tier-${ ratingTier }` }
 				target="_blank"
@@ -60,45 +66,39 @@ export default React.createClass( {
 				href={ this.buildReviewUrl( ratingTier ) }
 			>
 				<span className="plugin-ratings__rating-tier-text">
-					{
-						this.translate(
-							'%(ratingTier)s star', '%(ratingTier)s stars', {
-								count: ratingTier,
-								args: { ratingTier: ratingTier }
-							}
-						)
-					}
+					{ this.props.translate( '%(ratingTier)s star', '%(ratingTier)s stars', {
+						count: ratingTier,
+						args: { ratingTier: ratingTier },
+					} ) }
 				</span>
 				<span className="plugin-ratings__bar">
 					<ProgressBar
 						value={ numberOfRatings }
 						total={ numRatings }
-						title={ this.translate( '%(numberOfRatings)s ratings', { args: { numberOfRatings } } ) }
+						title={ this.props.translate( '%(numberOfRatings)s ratings', { args: { numberOfRatings } } ) }
 					/>
 				</span>
 			</a>
-		);
+        );
 	},
 
 	renderDownloaded() {
 		let downloaded = this.props.downloaded;
 		if ( downloaded > 100000 ) {
-			downloaded = this.numberFormat( Math.floor( downloaded / 10000 ) * 10000 ) + '+';
+			downloaded = this.props.numberFormat( Math.floor( downloaded / 10000 ) * 10000 ) + '+';
 		} else if ( downloaded > 10000 ) {
-			downloaded = this.numberFormat( Math.floor( downloaded / 1000 ) * 1000 ) + '+';
+			downloaded = this.props.numberFormat( Math.floor( downloaded / 1000 ) * 1000 ) + '+';
 		} else {
-			downloaded = this.numberFormat( downloaded );
+			downloaded = this.props.numberFormat( downloaded );
 		}
 
 		return (
-			<div className="plugin-ratings__downloads">
-				{
-					this.translate( '%(installs)s downloads', {
-						args: { installs: downloaded }
-					} )
-				}
+            <div className="plugin-ratings__downloads">
+				{ this.props.translate( '%(installs)s downloads', {
+					args: { installs: downloaded },
+				} ) }
 			</div>
-		);
+        );
 	},
 
 	render() {
@@ -114,21 +114,23 @@ export default React.createClass( {
 
 		const tierViews = this.ratingTiers.map( tierLevel => this.renderRatingTier( tierLevel ) );
 		return (
-			<div className="plugin-ratings">
+            <div className="plugin-ratings">
 				<div className="plugin-ratings__rating-stars">
 					<Rating rating={ rating } />
 				</div>
 				<div className="plugin-ratings__rating-text">
-					{ this.translate( 'Based on %(ratingsNumber)s rating', 'Based on %(ratingsNumber)s ratings', {
-						count: numRatings,
-						args: { ratingsNumber: numRatings }
-					} ) }
+					{ this.props.translate(
+						'Based on %(ratingsNumber)s rating',
+						'Based on %(ratingsNumber)s ratings',
+						{
+							count: numRatings,
+							args: { ratingsNumber: numRatings },
+						}
+					) }
 				</div>
-				<div className="plugin-ratings__rating-tiers">
-					{ tierViews }
-				</div>
+				<div className="plugin-ratings__rating-tiers">{ tierViews }</div>
 				{ this.renderDownloaded() }
 			</div>
-		);
-	}
-} );
+        );
+	},
+}));

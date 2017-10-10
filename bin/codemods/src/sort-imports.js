@@ -7,12 +7,16 @@
  */
 const fs = require( 'fs' );
 const _ = require( 'lodash' );
+const docblock = require( 'jest-docblock' );
+const config = require( './config' );
 
 /**
  * Gather all of the external deps and throw them in a set
  */
+const nodeJsDeps = require( 'repl' )._builtinLibs;
 const packageJson = JSON.parse( fs.readFileSync( './package.json', 'utf8' ) );
 const packageJsonDeps = []
+	.concat( nodeJsDeps )
 	.concat( Object.keys( packageJson.dependencies ) )
 	.concat( Object.keys( packageJson.devDependencies ) );
 
@@ -21,30 +25,7 @@ const externalDependenciesSet = new Set( packageJsonDeps );
 const externalBlock = { type: "Block", value: "*\n * External dependencies\n " };
 const internalBlock = { type: "Block", value: "*\n * Internal dependencies\n " };
 
-
-/**
- * Returns true if the given text contains @format.
- * within its first docblock. False otherwise.
- *
- * @param {String} text text to scan for the format keyword within the first docblock
- */
-const shouldFormat = text => {
-	const firstDocBlockStartIndex = text.indexOf( '/**' );
-
-	if ( -1 === firstDocBlockStartIndex ) {
-		return false;
-	}
-
-	const firstDocBlockEndIndex = text.indexOf( '*/', firstDocBlockStartIndex + 1 );
-
-	if ( -1 === firstDocBlockEndIndex ) {
-		return false;
-	}
-
-	const firstDocBlockText = text.substring( firstDocBlockStartIndex, firstDocBlockEndIndex + 1 );
-	return firstDocBlockText.indexOf( '@format' ) >= 0;
-};
-
+const getPragmaDocblock = text => docblock.print( { pragmas: docblock.parse( docblock.extract( text ) ) } );
 
 /**
  * Removes the extra newlines between two import statements
@@ -55,6 +36,9 @@ const removeExtraNewlines = str => str.replace(/(import.*\n)\n+(import)/g, '$1$2
  * Adds a newline in between the last import of external deps + the internal deps docblock
  */
 const addNewlineBeforeDocBlock = str => str.replace( /(import.*\n)(\/\*\*)/, '$1\n$2' );
+
+const srcModifications = _.flow( [ removeExtraNewlines, addNewlineBeforeDocBlock, _.trimStart ] );
+
 const isExternal = importNode => externalDependenciesSet.has( importNode.source.value.split('/')[ 0 ] );
 
 /**
@@ -66,9 +50,11 @@ const sortImports = importNodes => _.sortBy( importNodes, node => node.source.va
 
 module.exports = function ( file, api ) {
 	const j = api.jscodeshift;
-	const src = j(file.source);
-	const includeFormatBlock = shouldFormat( src.toSource().toString() );
-	const declarations = src.find(j.ImportDeclaration);
+	const srcWithoutDocblock = docblock.strip( file.source );
+	const newDocblock = getPragmaDocblock( file.source );
+
+	const src = j( srcWithoutDocblock );
+	const declarations = src.find( j.ImportDeclaration );
 
 	// if there are no deps at all, then return early.
 	if ( _.isEmpty( declarations.nodes() ) ) {
@@ -91,18 +77,17 @@ module.exports = function ( file, api ) {
 	}
 
 	const newDeclarations = []
-		.concat( includeFormatBlock && '/** @format */')
+		.concat( newDocblock )
 		.concat( externalDeps )
 		.concat( internalDeps );
 
 	declarations.remove();
 
-	return  addNewlineBeforeDocBlock(
-		removeExtraNewlines(
+	return  srcModifications(
 			src
 				.find(j.Statement)
 				.at(0)
 				.insertBefore(newDeclarations)
-				.toSource( { quote: 'single' } ) )
+				.toSource(config.recastOptions)
 		);
 };

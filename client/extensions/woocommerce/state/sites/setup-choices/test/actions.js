@@ -1,3 +1,5 @@
+/** @format */
+
 /**
  * External dependencies
  */
@@ -19,9 +21,7 @@ import {
 	setCreatedDefaultShippingZone,
 	setUpStorePages,
 } from '../actions';
-import { LOADING } from 'woocommerce/state/constants';
 import useNock from 'test/helpers/use-nock';
-import { useSandbox } from 'test/helpers/use-sinon';
 import {
 	WOOCOMMERCE_SETUP_CHOICE_UPDATE_REQUEST,
 	WOOCOMMERCE_SETUP_CHOICE_UPDATE_REQUEST_SUCCESS,
@@ -29,13 +29,13 @@ import {
 	WOOCOMMERCE_SETUP_CHOICES_REQUEST_SUCCESS,
 	WOOCOMMERCE_SETUP_STORE_PAGES_REQUEST,
 } from 'woocommerce/state/action-types';
+import { LOADING } from 'woocommerce/state/constants';
 
 describe( 'actions', () => {
 	describe( '#fetchSetupChoices()', () => {
 		const siteId = '123';
 
-		useSandbox();
-		useNock( ( nock ) => {
+		useNock( nock => {
 			nock( 'https://public-api.wordpress.com:443' )
 				.persist()
 				.get( '/rest/v1.1/sites/123/calypso-preferences/woocommerce' )
@@ -54,7 +54,10 @@ describe( 'actions', () => {
 			const getState = () => ( {} );
 			const dispatch = spy();
 			fetchSetupChoices( siteId )( dispatch, getState );
-			expect( dispatch ).to.have.been.calledWith( { type: WOOCOMMERCE_SETUP_CHOICES_REQUEST, siteId } );
+			expect( dispatch ).to.have.been.calledWith( {
+				type: WOOCOMMERCE_SETUP_CHOICES_REQUEST,
+				siteId,
+			} );
 		} );
 
 		it( 'should dispatch a success action with setup choices when request completes', () => {
@@ -74,7 +77,7 @@ describe( 'actions', () => {
 						created_default_shipping_zone: true,
 						finished_initial_install_of_required_plugins: true,
 						set_store_address_during_initial_setup: true,
-					}
+					},
 				} );
 			} );
 		} );
@@ -85,11 +88,11 @@ describe( 'actions', () => {
 					woocommerce: {
 						sites: {
 							[ siteId ]: {
-								setupChoices: LOADING
-							}
-						}
-					}
-				}
+								setupChoices: LOADING,
+							},
+						},
+					},
+				},
 			} );
 			const dispatch = spy();
 			fetchSetupChoices( siteId )( dispatch, getState );
@@ -100,8 +103,7 @@ describe( 'actions', () => {
 	describe( '#setFinishedInitialSetup', () => {
 		const siteId = '123';
 
-		useSandbox();
-		useNock( ( nock ) => {
+		useNock( nock => {
 			nock( 'https://public-api.wordpress.com:443' )
 				.persist()
 				.post( '/rest/v1.1/sites/123/calypso-preferences/woocommerce', {
@@ -126,7 +128,7 @@ describe( 'actions', () => {
 				type: WOOCOMMERCE_SETUP_CHOICE_UPDATE_REQUEST,
 				siteId,
 				key: 'finished_initial_setup',
-				value: true
+				value: true,
 			} );
 		} );
 
@@ -147,7 +149,7 @@ describe( 'actions', () => {
 						created_default_shipping_zone: false,
 						finished_initial_install_of_required_plugins: false,
 						set_store_address_during_initial_setup: false,
-					}
+					},
 				} );
 			} );
 		} );
@@ -156,8 +158,7 @@ describe( 'actions', () => {
 	describe( '#setOptedOutOfShippingSetup', () => {
 		const siteId = '123';
 
-		useSandbox();
-		useNock( ( nock ) => {
+		useNock( nock => {
 			nock( 'https://public-api.wordpress.com:443' )
 				.persist()
 				.post( '/rest/v1.1/sites/123/calypso-preferences/woocommerce', {
@@ -182,7 +183,7 @@ describe( 'actions', () => {
 				type: WOOCOMMERCE_SETUP_CHOICE_UPDATE_REQUEST,
 				siteId,
 				key: 'opted_out_of_shipping_setup',
-				value: true
+				value: true,
 			} );
 		} );
 
@@ -203,7 +204,7 @@ describe( 'actions', () => {
 						created_default_shipping_zone: false,
 						finished_initial_install_of_required_plugins: false,
 						set_store_address_during_initial_setup: false,
-					}
+					},
 				} );
 			} );
 		} );
@@ -212,8 +213,7 @@ describe( 'actions', () => {
 	describe( '#setOptedOutOfTaxesSetup', () => {
 		const siteId = '123';
 
-		useSandbox();
-		useNock( ( nock ) => {
+		useNock( nock => {
 			nock( 'https://public-api.wordpress.com:443' )
 				.persist()
 				.post( '/rest/v1.1/sites/123/calypso-preferences/woocommerce', {
@@ -238,7 +238,7 @@ describe( 'actions', () => {
 				type: WOOCOMMERCE_SETUP_CHOICE_UPDATE_REQUEST,
 				siteId,
 				key: 'opted_out_of_taxes_setup',
-				value: true
+				value: true,
 			} );
 		} );
 
@@ -259,7 +259,7 @@ describe( 'actions', () => {
 						created_default_shipping_zone: false,
 						finished_initial_install_of_required_plugins: false,
 						set_store_address_during_initial_setup: false,
-					}
+					},
 				} );
 			} );
 		} );
@@ -268,8 +268,7 @@ describe( 'actions', () => {
 	describe( '#setTriedCustomizerDuringInitialSetup', () => {
 		const siteId = '123';
 
-		useSandbox();
-		useNock( ( nock ) => {
+		useNock( nock => {
 			nock( 'https://public-api.wordpress.com:443' )
 				.persist()
 				.post( '/rest/v1.1/sites/123/calypso-preferences/woocommerce', {
@@ -315,7 +314,7 @@ describe( 'actions', () => {
 						created_default_shipping_zone: false,
 						finished_initial_install_of_required_plugins: false,
 						set_store_address_during_initial_setup: false,
-					}
+					},
 				} );
 			} );
 		} );
@@ -324,8 +323,7 @@ describe( 'actions', () => {
 	describe( '#setCreatedDefaultShippingZone', () => {
 		const siteId = '123';
 
-		useSandbox();
-		useNock( ( nock ) => {
+		useNock( nock => {
 			nock( 'https://public-api.wordpress.com:443' )
 				.persist()
 				.post( '/rest/v1.1/sites/123/calypso-preferences/woocommerce', {
@@ -371,7 +369,7 @@ describe( 'actions', () => {
 						created_default_shipping_zone: true,
 						finished_initial_install_of_required_plugins: false,
 						set_store_address_during_initial_setup: false,
-					}
+					},
 				} );
 			} );
 		} );
@@ -380,8 +378,7 @@ describe( 'actions', () => {
 	describe( '#setFinishedInstallOfRequiredPlugins', () => {
 		const siteId = '123';
 
-		useSandbox();
-		useNock( ( nock ) => {
+		useNock( nock => {
 			nock( 'https://public-api.wordpress.com:443' )
 				.persist()
 				.post( '/rest/v1.1/sites/123/calypso-preferences/woocommerce', {
@@ -406,7 +403,7 @@ describe( 'actions', () => {
 				type: WOOCOMMERCE_SETUP_CHOICE_UPDATE_REQUEST,
 				siteId,
 				key: 'finished_initial_install_of_required_plugins',
-				value: true
+				value: true,
 			} );
 		} );
 
@@ -427,7 +424,7 @@ describe( 'actions', () => {
 						created_default_shipping_zone: false,
 						finished_initial_install_of_required_plugins: true,
 						set_store_address_during_initial_setup: false,
-					}
+					},
 				} );
 			} );
 		} );
@@ -445,8 +442,7 @@ describe( 'actions', () => {
 			message: 'All missing WooCommerce pages successfully installed',
 		};
 
-		useSandbox();
-		useNock( ( nock ) => {
+		useNock( nock => {
 			nock( 'https://public-api.wordpress.com:443' )
 				.persist()
 				.post( '/rest/v1.1/jetpack-blogs/123/rest-api/' )
@@ -483,8 +479,7 @@ describe( 'actions', () => {
 	describe( '#setCheckedTaxSetup', () => {
 		const siteId = '123';
 
-		useSandbox();
-		useNock( ( nock ) => {
+		useNock( nock => {
 			nock( 'https://public-api.wordpress.com:443' )
 				.persist()
 				.post( '/rest/v1.1/sites/123/calypso-preferences/woocommerce', {
@@ -510,7 +505,7 @@ describe( 'actions', () => {
 				type: WOOCOMMERCE_SETUP_CHOICE_UPDATE_REQUEST,
 				siteId,
 				key: 'checked_tax_setup',
-				value: true
+				value: true,
 			} );
 		} );
 
@@ -532,7 +527,7 @@ describe( 'actions', () => {
 						finished_initial_install_of_required_plugins: false,
 						set_store_address_during_initial_setup: false,
 						checked_tax_setup: true,
-					}
+					},
 				} );
 			} );
 		} );
@@ -541,8 +536,7 @@ describe( 'actions', () => {
 	describe( '#setSetStoreAddressDuringInitialSetup', () => {
 		const siteId = '123';
 
-		useSandbox();
-		useNock( ( nock ) => {
+		useNock( nock => {
 			nock( 'https://public-api.wordpress.com:443' )
 				.persist()
 				.post( '/rest/v1.1/sites/123/calypso-preferences/woocommerce', {
@@ -588,7 +582,7 @@ describe( 'actions', () => {
 						created_default_shipping_zone: false,
 						finished_initial_install_of_required_plugins: false,
 						set_store_address_during_initial_setup: true,
-					}
+					},
 				} );
 			} );
 		} );

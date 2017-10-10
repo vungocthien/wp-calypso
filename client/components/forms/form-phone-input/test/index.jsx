@@ -1,10 +1,14 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
-import React from 'react';
-import { shallow, mount } from 'enzyme';
 import { expect } from 'chai';
-import { withContainer as useFakeDom } from 'test/helpers/use-fake-dom';
+import { shallow, mount } from 'enzyme';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -16,13 +20,13 @@ import mockCountriesListEmpty from './mocks/mock-countries-list-empty';
 const countries = mockCountriesList.get();
 
 describe( 'FormPhoneInput', function() {
-	useFakeDom();
-
 	describe( 'getValue()', function() {
 		it( 'should set country from props', function() {
 			const phoneComponent = shallow(
-				<FormPhoneInput countriesList={ mockCountriesList }
-					initialCountryCode={ countries[ 1 ].code } />
+				<FormPhoneInput
+					countriesList={ mockCountriesList }
+					initialCountryCode={ countries[ 1 ].code }
+				/>
 			);
 			expect( phoneComponent.instance().getValue().countryData ).to.deep.equal( countries[ 1 ] );
 		} );
@@ -36,8 +40,8 @@ describe( 'FormPhoneInput', function() {
 			const phoneComponent = mount( <FormPhoneInput countriesList={ mockCountriesList } /> );
 			phoneComponent.find( 'select' ).simulate( 'change', {
 				target: {
-					value: countries[ 1 ].code
-				}
+					value: countries[ 1 ].code,
+				},
 			} );
 
 			expect( phoneComponent.instance().getValue().countryData ).to.deep.equal( countries[ 1 ] );

@@ -1,17 +1,48 @@
+/** @format */
 /**
  * External dependencies
  */
 import { expect } from 'chai';
-import mockery from 'mockery';
-import { noop } from 'lodash';
+import store from 'store';
 
 /**
  * Internal dependencies
  */
+import * as PreferencesActions from '../actions';
 import { USER_SETTING_KEY, LOCALSTORAGE_KEY } from '../constants';
-import { useSandbox } from 'test/helpers/use-sinon';
-import useMockery from 'test/helpers/use-mockery';
+import Dispatcher from 'dispatcher';
+import { getSettings, postSettings } from 'lib/wp';
 import useNock from 'test/helpers/use-nock';
+import { useSandbox } from 'test/helpers/use-sinon';
+jest.mock( 'lib/user/utils', () => ( {
+	isLoggedIn: () => true,
+} ) );
+jest.mock( 'store', () => ( {
+	get: () => {},
+	set: () => {},
+} ) );
+jest.mock( 'dispatcher', () => ( {
+	handleViewAction: () => {},
+	handleServerAction: () => {},
+} ) );
+jest.mock( 'lib/wp', () => {
+	const { stub } = require( 'sinon' );
+	const getSettings = stub();
+	const postSettings = stub();
+
+	return {
+		getSettings,
+		postSettings,
+		undocumented: () => ( {
+			me: () => ( {
+				settings: () => ( {
+					get: getSettings,
+					update: postSettings,
+				} ),
+			} ),
+		} ),
+	};
+} );
 
 /**
  * Constants
@@ -19,37 +50,9 @@ import useNock from 'test/helpers/use-nock';
 const DUMMY_PERSISTED_PREFERENCES = { saved: true };
 
 describe( 'PreferencesActions', function() {
-	let sandbox, PreferencesActions, getSettings, postSettings;
-	const store = { get: noop, set: noop };
-	const Dispatcher = { handleViewAction: noop, handleServerAction: noop };
-
-	useSandbox( ( _sandbox ) => sandbox = _sandbox );
-	useMockery();
+	let sandbox;
+	useSandbox( _sandbox => ( sandbox = _sandbox ) );
 	useNock();
-
-	before( function() {
-		mockery.registerMock( 'lib/user/utils', { isLoggedIn: () => true } );
-		mockery.registerMock( 'store', store );
-		mockery.registerMock( 'dispatcher', Dispatcher );
-		mockery.registerMock( 'lib/wp', {
-			undocumented: function() {
-				return {
-					me: function() {
-						return {
-							settings: function() {
-								return {
-									get: getSettings,
-									update: postSettings
-								};
-							}
-						};
-					}
-				};
-			}
-		} );
-
-		PreferencesActions = require( '../actions' );
-	} );
 
 	beforeEach( function() {
 		sandbox.restore();
@@ -58,14 +61,21 @@ describe( 'PreferencesActions', function() {
 		sandbox.stub( Dispatcher, 'handleViewAction' );
 		sandbox.stub( Dispatcher, 'handleServerAction' );
 
-		getSettings = sandbox.stub().callsArgWithAsync( 0, null, {
-			[ USER_SETTING_KEY ]: DUMMY_PERSISTED_PREFERENCES
+		getSettings.callsArgWithAsync( 0, null, {
+			[ USER_SETTING_KEY ]: DUMMY_PERSISTED_PREFERENCES,
 		} );
-		postSettings = sandbox.stub().callsArgAsync( 1 );
+		postSettings.callsArgAsync( 1 );
+	} );
+
+	afterEach( () => {
+		getSettings.reset();
+		postSettings.reset();
 	} );
 
 	describe( '#fetch()', function() {
-		it( 'should retrieve from localStorage and trigger a request to the REST API', function( done ) {
+		it( 'should retrieve from localStorage and trigger a request to the REST API', function(
+			done
+		) {
 			store.get.restore();
 			sandbox.stub( store, 'get' ).returns( DUMMY_PERSISTED_PREFERENCES );
 
@@ -75,13 +85,16 @@ describe( 'PreferencesActions', function() {
 			expect( Dispatcher.handleServerAction ).to.have.been.calledWithMatch( {
 				type: 'RECEIVE_ME_SETTINGS',
 				data: {
-					[ USER_SETTING_KEY ]: DUMMY_PERSISTED_PREFERENCES
-				}
+					[ USER_SETTING_KEY ]: DUMMY_PERSISTED_PREFERENCES,
+				},
 			} );
 
 			process.nextTick( function() {
 				expect( Dispatcher.handleServerAction ).to.have.been.calledTwice;
-				expect( store.set ).to.have.been.calledWith( LOCALSTORAGE_KEY, DUMMY_PERSISTED_PREFERENCES );
+				expect( store.set ).to.have.been.calledWith(
+					LOCALSTORAGE_KEY,
+					DUMMY_PERSISTED_PREFERENCES
+				);
 				done();
 			} );
 		} );
@@ -89,7 +102,7 @@ describe( 'PreferencesActions', function() {
 		it( 'should not persist to localStorage from remote request if error occurs', function( done ) {
 			sandbox.stub( PreferencesActions, 'mergePreferencesToLocalStorage' );
 
-			getSettings = sandbox.stub().callsArgWithAsync( 0, true );
+			getSettings.callsArgWithAsync( 0, true );
 
 			PreferencesActions.fetch();
 			process.nextTick( function() {
@@ -124,15 +137,17 @@ describe( 'PreferencesActions', function() {
 
 			expect( store.set ).to.have.been.calledWith( LOCALSTORAGE_KEY, { one: 1 } );
 			expect( Dispatcher.handleViewAction ).to.have.been.calledWithMatch( {
-				type: 'UPDATE_ME_SETTINGS'
+				type: 'UPDATE_ME_SETTINGS',
 			} );
-			expect( postSettings ).to.have.been.calledWithMatch( JSON.stringify( {
-				[ USER_SETTING_KEY ]: { one: 1 }
-			} ) );
+			expect( postSettings ).to.have.been.calledWithMatch(
+				JSON.stringify( {
+					[ USER_SETTING_KEY ]: { one: 1 },
+				} )
+			);
 
 			process.nextTick( function() {
 				expect( Dispatcher.handleServerAction ).to.have.been.calledWithMatch( {
-					type: 'RECEIVE_ME_SETTINGS'
+					type: 'RECEIVE_ME_SETTINGS',
 				} );
 				done();
 			} );
@@ -147,8 +162,8 @@ describe( 'PreferencesActions', function() {
 			expect( Dispatcher.handleViewAction ).to.have.been.calledWithMatch( {
 				type: 'UPDATE_ME_SETTINGS',
 				data: {
-					[ USER_SETTING_KEY ]: { two: 2 }
-				}
+					[ USER_SETTING_KEY ]: { two: 2 },
+				},
 			} );
 		} );
 
@@ -161,8 +176,8 @@ describe( 'PreferencesActions', function() {
 			expect( Dispatcher.handleViewAction ).to.have.been.calledWithMatch( {
 				type: 'UPDATE_ME_SETTINGS',
 				data: {
-					[ USER_SETTING_KEY ]: { one: null }
-				}
+					[ USER_SETTING_KEY ]: { one: null },
+				},
 			} );
 		} );
 
@@ -173,7 +188,9 @@ describe( 'PreferencesActions', function() {
 			process.nextTick( function() {
 				expect( postSettings ).to.have.been.calledTwice;
 				expect( Dispatcher.handleServerAction ).to.have.been.calledOnce;
-				expect( Dispatcher.handleServerAction ).to.have.been.calledWithMatch( { type: 'RECEIVE_ME_SETTINGS' } );
+				expect( Dispatcher.handleServerAction ).to.have.been.calledWithMatch( {
+					type: 'RECEIVE_ME_SETTINGS',
+				} );
 				done();
 			} );
 		} );
@@ -188,16 +205,18 @@ describe( 'PreferencesActions', function() {
 			expect( Dispatcher.handleViewAction ).to.have.been.calledWithMatch( {
 				type: 'UPDATE_ME_SETTINGS',
 				data: {
-					[ USER_SETTING_KEY ]: { one: 1 }
-				}
+					[ USER_SETTING_KEY ]: { one: 1 },
+				},
 			} );
-			expect( postSettings ).to.have.been.calledWithMatch( JSON.stringify( {
-				[ USER_SETTING_KEY ]: { one: 1 }
-			} ) );
+			expect( postSettings ).to.have.been.calledWithMatch(
+				JSON.stringify( {
+					[ USER_SETTING_KEY ]: { one: 1 },
+				} )
+			);
 
 			process.nextTick( function() {
 				expect( Dispatcher.handleServerAction ).to.have.been.calledWithMatch( {
-					type: 'RECEIVE_ME_SETTINGS'
+					type: 'RECEIVE_ME_SETTINGS',
 				} );
 
 				done();

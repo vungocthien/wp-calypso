@@ -1,15 +1,20 @@
 /**
  * External dependencies
+ *
+ * @format
  */
-var React = require( 'react' );
+
+import React from 'react';
+
+import { localize } from 'i18n-calypso';
 
 /**
  * Internal dependencies
  */
-var analytics = require( 'lib/analytics' ),
-	upgradesActions = require( 'lib/upgrades/actions' );
+import analytics from 'lib/analytics';
+import upgradesActions from 'lib/upgrades/actions';
 
-module.exports = React.createClass( {
+module.exports = localize(React.createClass( {
 	displayName: 'CartCoupon',
 
 	getInitialState: function() {
@@ -20,7 +25,7 @@ module.exports = React.createClass( {
 			isCouponFormShowing: cartHadCouponBeforeMount,
 			hasSubmittedCoupon: cartHadCouponBeforeMount,
 			couponInputValue: coupon,
-			userChangedCoupon: false
+			userChangedCoupon: false,
 		};
 	},
 
@@ -46,12 +51,12 @@ module.exports = React.createClass( {
 		event.preventDefault();
 
 		analytics.tracks.recordEvent( 'calypso_checkout_coupon_submit', {
-			coupon_code: this.state.couponInputValue
+			coupon_code: this.state.couponInputValue,
 		} );
 
 		this.setState( {
 			userChangedCoupon: false,
-			hasSubmittedCoupon: true
+			hasSubmittedCoupon: true,
 		} );
 		upgradesActions.applyCoupon( this.state.couponInputValue );
 	},
@@ -59,7 +64,7 @@ module.exports = React.createClass( {
 	handleCouponInput: function( event ) {
 		this.setState( {
 			userChangedCoupon: true,
-			couponInputValue: event.target.value
+			couponInputValue: event.target.value,
 		} );
 	},
 
@@ -73,8 +78,10 @@ module.exports = React.createClass( {
 		}
 
 		return (
-			<a href="" onClick={ this.toggleCouponDetails }>{ this.translate( 'Have a coupon code?' ) }</a>
-		);
+            <a href="" onClick={ this.toggleCouponDetails }>
+				{ this.props.translate( 'Have a coupon code?' ) }
+			</a>
+        );
 	},
 
 	getCouponForm: function() {
@@ -87,13 +94,18 @@ module.exports = React.createClass( {
 		}
 
 		return (
-			<form onSubmit={ this.applyCoupon }>
-				<input type="text" placeholder={ this.translate( 'Enter Coupon Code', { textOnly: true } ) } onChange={ this.handleCouponInput } value={ this.state.couponInputValue } />
+            <form onSubmit={ this.applyCoupon }>
+				<input
+					type="text"
+					placeholder={ this.props.translate( 'Enter Coupon Code', { textOnly: true } ) }
+					onChange={ this.handleCouponInput }
+					value={ this.state.couponInputValue }
+				/>
 				<button type="submit" className="button">
-					{ this.translate( 'Apply' ) }
+					{ this.props.translate( 'Apply' ) }
 				</button>
 			</form>
-		);
+        );
 	},
 
 	render: function() {
@@ -103,5 +115,5 @@ module.exports = React.createClass( {
 				{ this.getCouponForm() }
 			</div>
 		);
-	}
-} );
+	},
+} ));

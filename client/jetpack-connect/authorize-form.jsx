@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { localize } from 'i18n-calypso';
 import cookie from 'cookie';
+import { get, includes } from 'lodash';
 
 /**
  * Internal dependencies
@@ -38,6 +39,7 @@ import { requestSites } from 'state/sites/actions';
 import { isRequestingSites, isRequestingSite } from 'state/sites/selectors';
 import MainWrapper from './main-wrapper';
 import HelpButton from './help-button';
+import JetpackConnectHappychatButton from './happychat-button';
 import { urlToSlug } from 'lib/url';
 import LoggedInForm from './auth-logged-in-form';
 import LoggedOutForm from './auth-logged-out-form';
@@ -57,7 +59,7 @@ class JetpackConnectAuthorizeForm extends Component {
 			queryObject: PropTypes.shape( {
 				client_id: PropTypes.string,
 				from: PropTypes.string,
-			} ).isRequired,
+			} ),
 		} ).isRequired,
 		recordTracksEvent: PropTypes.func,
 		setTracksAnonymousUserId: PropTypes.func,
@@ -72,7 +74,7 @@ class JetpackConnectAuthorizeForm extends Component {
 	componentWillMount() {
 		// set anonymous ID for cross-system analytics
 		const queryObject = this.props.jetpackConnectAuthorize.queryObject;
-		if ( queryObject._ui && 'anon' === queryObject._ut ) {
+		if ( queryObject && queryObject._ui && 'anon' === queryObject._ut ) {
 			this.props.setTracksAnonymousUserId( queryObject._ui );
 		}
 		this.props.recordTracksEvent( 'calypso_jpc_authorize_form_view' );
@@ -90,8 +92,11 @@ class JetpackConnectAuthorizeForm extends Component {
 		);
 	}
 
-	isWCS() {
-		return 'woocommerce-services' === this.props.jetpackConnectAuthorize.queryObject.from;
+	isWoo() {
+		const wooSlugs = [ 'woocommerce-setup-wizard', 'woocommerce-services' ];
+		const jetpackConnectSource = get( this.props, 'jetpackConnectAuthorize.queryObject.from' );
+
+		return includes( wooSlugs, jetpackConnectSource );
 	}
 
 	handleClickHelp = () => {
@@ -108,7 +113,9 @@ class JetpackConnectAuthorizeForm extends Component {
 					actionURL="/jetpack/connect"
 				/>
 				<LoggedOutFormLinks>
-					<HelpButton onClick={ this.handleClickHelp } />
+					<JetpackConnectHappychatButton>
+						<HelpButton onClick={ this.handleClickHelp } />
+					</JetpackConnectHappychatButton>
 				</LoggedOutFormLinks>
 			</Main>
 		);
@@ -116,9 +123,9 @@ class JetpackConnectAuthorizeForm extends Component {
 
 	renderForm() {
 		return this.props.user ? (
-			<LoggedInForm { ...this.props } isSSO={ this.isSSO() } isWCS={ this.isWCS() } />
+			<LoggedInForm { ...this.props } isSSO={ this.isSSO() } isWoo={ this.isWoo() } />
 		) : (
-			<LoggedOutForm { ...this.props } isSSO={ this.isSSO() } isWCS={ this.isWCS() } />
+			<LoggedOutForm { ...this.props } isSSO={ this.isSSO() } isWoo={ this.isWoo() } />
 		);
 	}
 

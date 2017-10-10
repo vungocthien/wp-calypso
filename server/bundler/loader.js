@@ -113,9 +113,10 @@ function splitTemplate( path, section ) {
 		'		next();',
 		'	}, function onError( error ) {',
 		'		if ( ! LoadingError.isRetry() ) {',
+		'			console.warn( error );',
 		'			LoadingError.retry( ' + sectionNameString + ' );',
 		'		} else {',
-		'			console.error(error);',
+		'			console.error( error );',
 		'			context.store.dispatch( { type: "SECTION_SET", isLoading: false } );',
 		'			LoadingError.show( ' + sectionNameString + ' );',
 		'		}',
@@ -169,10 +170,14 @@ function singleEnsure( chunkName ) {
 	return result.join( '\n' );
 }
 
-module.exports = function( content ) {
-	var sections;
+function sectionsWithCSSUrls( sections ) {
+	return sections.map( section => Object.assign( {}, section, section.css && {
+		cssUrls: utils.getCssUrls( section.css )
+	} ) );
+}
 
-	sections = require( this.resourcePath );
+module.exports = function( content ) {
+	const sections = require( this.resourcePath );
 
 	if ( ! Array.isArray( sections ) ) {
 		this.emitError( 'Chunks module is not an array' );
@@ -181,5 +186,5 @@ module.exports = function( content ) {
 
 	this.addDependency( 'page' );
 
-	return getSectionsModule( sections );
+	return getSectionsModule( sectionsWithCSSUrls( sections ) );
 };

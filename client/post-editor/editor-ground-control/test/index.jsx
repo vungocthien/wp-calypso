@@ -1,58 +1,51 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
 import { expect } from 'chai';
-import { noop } from 'lodash';
-import React from 'react';
 import { shallow } from 'enzyme';
-import mockery from 'mockery';
+import React from 'react';
 
 /**
  * Internal dependencies
  */
-import EmptyComponent from 'test/helpers/react/empty-component';
-import useMockery from 'test/helpers/use-mockery';
-import useFakeDom from 'test/helpers/use-fake-dom';
+import { EditorGroundControl } from '../';
+
+jest.mock( 'blocks/site', () => require( 'components/empty-component' ) );
+jest.mock( 'components/card', () => require( 'components/empty-component' ) );
+jest.mock( 'components/popover', () => require( 'components/empty-component' ) );
+jest.mock( 'components/post-schedule', () => require( 'components/empty-component' ) );
+jest.mock( 'components/sticky-panel', () => require( 'components/empty-component' ) );
+jest.mock( 'lib/posts/actions', () => ( {
+	edit: () => {},
+} ) );
+jest.mock( 'lib/posts/actions', () => ( {
+	recordEvent: () => {},
+	recordStat: () => {},
+} ) );
+jest.mock( 'lib/user', () => () => {} );
+jest.mock( 'post-editor/edit-post-status', () => require( 'components/empty-component' ) );
+jest.mock( 'post-editor/editor-status-label', () => require( 'components/empty-component' ) );
 
 /**
  * Module variables
  */
 const MOCK_SITE = {
 	capabilities: {
-		publish_posts: true
+		publish_posts: true,
 	},
-	options: {}
+	options: {},
 };
 
 describe( 'EditorGroundControl', function() {
-	let EditorGroundControl;
-
-	useMockery();
-	useFakeDom();
-
-	before( function() {
-		mockery.registerMock( 'components/card', EmptyComponent );
-		mockery.registerMock( 'components/popover', EmptyComponent );
-		mockery.registerMock( 'blocks/site', EmptyComponent );
-		mockery.registerMock( 'post-editor/edit-post-status', EmptyComponent );
-		mockery.registerMock( 'post-editor/editor-status-label', EmptyComponent );
-		mockery.registerMock( 'components/sticky-panel', EmptyComponent );
-		mockery.registerMock( 'components/post-schedule', EmptyComponent );
-		mockery.registerMock( 'lib/posts/actions', { edit: noop } );
-		mockery.registerMock( 'lib/posts/stats', {
-			recordEvent: noop,
-			recordStat: noop
-		} );
-		EditorGroundControl = require( '../' ).EditorGroundControl;
-	} );
-
 	describe( '#getPreviewLabel()', function() {
 		it( 'should return View if the site is a Jetpack site and the post is published', function() {
 			var tree = shallow(
-				<EditorGroundControl
-					savedPost={ { status: 'publish' } }
-					site={ { jetpack: true } }
-				/>
+				<EditorGroundControl savedPost={ { status: 'publish' } } site={ { jetpack: true } } />
 			).instance();
 
 			expect( tree.getPreviewLabel() ).to.equal( 'View' );
@@ -85,13 +78,17 @@ describe( 'EditorGroundControl', function() {
 		} );
 
 		it( 'should return false if post does not exist', function() {
-			var tree = shallow( <EditorGroundControl isSaving={ false } hasContent isDirty /> ).instance();
+			var tree = shallow(
+				<EditorGroundControl isSaving={ false } hasContent isDirty />
+			).instance();
 
 			expect( tree.isSaveEnabled() ).to.be.false;
 		} );
 
 		it( 'should return true if dirty and post has content and post is not published', function() {
-			var tree = shallow( <EditorGroundControl isSaving={ false } post={ {} } hasContent isDirty /> ).instance();
+			var tree = shallow(
+				<EditorGroundControl isSaving={ false } post={ {} } hasContent isDirty />
+			).instance();
 
 			expect( tree.isSaveEnabled() ).to.be.true;
 		} );
@@ -103,7 +100,9 @@ describe( 'EditorGroundControl', function() {
 		} );
 
 		it( 'should return false if dirty and post is published', function() {
-			var tree = shallow( <EditorGroundControl isSaving={ false } post={ { status: 'publish' } } isDirty /> ).instance();
+			var tree = shallow(
+				<EditorGroundControl isSaving={ false } post={ { status: 'publish' } } isDirty />
+			).instance();
 
 			expect( tree.isSaveEnabled() ).to.be.false;
 		} );

@@ -1,13 +1,12 @@
+/** @format */
 /**
  * External dependencies
  */
 import { expect } from 'chai';
-import { spy } from 'sinon';
 
 /**
  * Internal dependencies
  */
-import useMockery from 'test/helpers/use-mockery';
 import {
 	withAnalytics,
 	bumpStat,
@@ -17,26 +16,33 @@ import {
 	recordGooglePageView,
 	recordTracksEvent,
 	recordPageView,
-	setTracksAnonymousUserId
+	setTracksAnonymousUserId,
 } from '../actions';
-import {
-	adTrackingMock,
-	analyticsMock,
-} from './helpers/analytics-mock';
+import { dispatcher as dispatch } from '../middleware.js';
+import { spy as mockAnalytics } from 'lib/analytics';
+import { spy as mockAdTracking } from 'lib/analytics/ad-tracking';
+
+jest.mock( 'lib/analytics', () => {
+	const analyticsSpy = require( 'sinon' ).spy();
+	const { analyticsMock } = require( './helpers/analytics-mock' );
+
+	const mock = analyticsMock( analyticsSpy );
+	mock.spy = analyticsSpy;
+
+	return mock;
+} );
+jest.mock( 'lib/analytics/ad-tracking', () => {
+	const adTrackingSpy = require( 'sinon' ).spy();
+	const { adTrackingMock } = require( './helpers/analytics-mock' );
+
+	const mock = adTrackingMock( adTrackingSpy );
+	mock.spy = adTrackingSpy;
+
+	return mock;
+} );
 
 describe( 'middleware', () => {
 	describe( 'analytics dispatching', () => {
-		const mockAnalytics = spy();
-		const mockAdTracking = spy();
-		let dispatch;
-
-		useMockery( mockery => {
-			mockery.registerMock( 'lib/analytics', analyticsMock( mockAnalytics ) );
-			mockery.registerMock( 'lib/analytics/ad-tracking', adTrackingMock( mockAdTracking ) );
-
-			dispatch = require( '../middleware.js' ).dispatcher;
-		} );
-
 		beforeEach( () => {
 			mockAnalytics.reset();
 			mockAdTracking.reset();

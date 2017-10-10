@@ -2,38 +2,43 @@
 /**
  * External dependencies
  */
-import sinon from 'sinon';
 import { expect } from 'chai';
+import sinon from 'sinon';
 
 /**
  * Internal dependencies
  */
+import * as actions from '../actions';
+import { tracks } from 'lib/analytics';
 import { READER_POSTS_RECEIVE } from 'state/action-types';
-import useMockery from 'test/helpers/use-mockery';
+import wp from 'lib/wp';
+
+const undocumented = wp.undocumented;
+
+jest.mock( 'lib/analytics', () => ( {
+	tracks: {
+		recordEvent: require( 'sinon' ).spy(),
+	},
+} ) );
+
+jest.mock( 'lib/wp', () => {
+	const { stub } = require( 'sinon' );
+	const readFeedPost = stub();
+	const readSitePost = stub();
+
+	return {
+		undocumented: () => ( {
+			readFeedPost,
+			readSitePost,
+		} ),
+	};
+} );
 
 describe( 'actions', () => {
-	let actions;
 	const dispatchSpy = sinon.spy();
-	const trackingSpy = sinon.spy();
-	const readFeedStub = sinon.stub();
-	const readSiteStub = sinon.stub();
-
-	useMockery( mockery => {
-		mockery.registerMock( 'lib/analytics', {
-			tracks: {
-				recordEvent: trackingSpy,
-			},
-		} );
-
-		mockery.registerMock( 'lib/wp', {
-			undocumented: () => ( {
-				readFeedPost: readFeedStub,
-				readSitePost: readSiteStub,
-			} ),
-		} );
-
-		actions = require( '../actions' );
-	} );
+	const trackingSpy = tracks.recordEvent;
+	const readFeedStub = undocumented().readFeedPost;
+	const readSiteStub = undocumented().readSitePost;
 
 	afterEach( () => {
 		dispatchSpy.reset();
@@ -114,7 +119,7 @@ describe( 'actions', () => {
 			];
 
 			actions.receivePosts( posts )( dispatchSpy );
-			return expect( dispatchSpy ).to.have.been.calledWith( sinon.match.func );
+			expect( dispatchSpy ).to.have.been.calledWith( sinon.match.func );
 		} );
 	} );
 

@@ -1,5 +1,7 @@
 /**
  * External dependencies
+ *
+ * @format
  */
 import {
 	drop,

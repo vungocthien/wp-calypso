@@ -1,31 +1,23 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
 import { expect } from 'chai';
-import mockery from 'mockery';
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 /**
  * Internal dependencies
  */
-import EmptyComponent from 'test/helpers/react/empty-component';
-import useFakeDom from 'test/helpers/use-fake-dom';
-import useMockery from 'test/helpers/use-mockery';
+import PluginAction from '../plugin-action';
+
+jest.mock( 'components/info-popover', () => require( 'components/empty-component' ) );
 
 describe( 'PluginAction', function() {
-	let mount, PluginAction;
-
-	useFakeDom();
-	useMockery();
-
-	before( () => {
-		mount = require( 'enzyme' ).mount;
-		mockery.registerMock( 'components/info-popover', EmptyComponent );
-
-		PluginAction = require( '../plugin-action' );
-	} );
-
 	describe( 'rendering with form toggle', function() {
 		it( 'should have plugin-action class', function() {
 			const wrapper = shallow( <PluginAction /> );
@@ -40,7 +32,11 @@ describe( 'PluginAction', function() {
 		} );
 
 		it( 'should render a plugin action label', function() {
-			const wrapper = shallow( <PluginAction label="hello"><span /></PluginAction> );
+			const wrapper = shallow(
+				<PluginAction label="hello">
+					<span />
+				</PluginAction>
+			);
 
 			expect( wrapper.find( '.plugin-action__label' ) ).to.have.lengthOf( 1 );
 		} );
@@ -48,13 +44,21 @@ describe( 'PluginAction', function() {
 
 	describe( 'rendering children', function() {
 		it( 'should not render a form toggle when children exist', function() {
-			const wrapper = mount( <PluginAction><span /></PluginAction> );
+			const wrapper = mount(
+				<PluginAction>
+					<span />
+				</PluginAction>
+			);
 
 			expect( wrapper.find( '.form-toggle' ) ).to.have.lengthOf( 0 );
 		} );
 
 		it( 'should render child within plugin-action__children container', function() {
-			const wrapper = mount( <PluginAction><span /></PluginAction> ),
+			const wrapper = mount(
+					<PluginAction>
+						<span />
+					</PluginAction>
+				),
 				children = wrapper.find( '.plugin-action__children' );
 
 			expect( children.length ).to.equal( 1 );
@@ -62,7 +66,11 @@ describe( 'PluginAction', function() {
 		} );
 
 		it( 'should render a plugin action label', function() {
-			const wrapper = mount( <PluginAction label="hello"><span /></PluginAction> );
+			const wrapper = mount(
+				<PluginAction label="hello">
+					<span />
+				</PluginAction>
+			);
 
 			expect( wrapper.find( '.plugin-action__label' ) ).to.have.lengthOf( 1 );
 		} );

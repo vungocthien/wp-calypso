@@ -1,13 +1,15 @@
-var assert = require( 'chai' ).assert,
-	sinon = require( 'sinon' ),
-	useFilesystemMocks = require( 'test/helpers/use-filesystem-mocks' ),
-	useFakeDom = require( 'test/helpers/use-fake-dom' );
+/**
+ * @format
+ * @jest-environment jsdom
+ */
+
+jest.mock( 'lib/wp', () => require( './mocks/lib/wp' ) );
+
+import { assert } from 'chai';
+import sinon from 'sinon';
 
 describe( 'index', function() {
 	var FollowList, FollowListSite, followList, site;
-
-	useFilesystemMocks( __dirname );
-	useFakeDom();
 
 	before( () => {
 		FollowList = require( 'lib/follow-list' );

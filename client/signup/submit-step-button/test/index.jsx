@@ -1,28 +1,23 @@
+/** @format */
 /**
  * External dependencies
  */
-import React from 'react';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
+import React from 'react';
 import { stub } from 'sinon';
 
 /**
  * Internal dependencies
  */
-import useMockery from 'test/helpers/use-mockery';
+import SubmitStepButton from '..';
+import { submitSignupStep } from 'lib/signup/actions';
+
+jest.mock( 'lib/signup/actions', () => ( {
+	submitSignupStep: require( 'sinon' ).stub(),
+} ) );
 
 describe( 'SubmitStepButton', () => {
-	let SubmitStepButton;
-	const submitSignupStep = stub();
-
-	useMockery( mockery => {
-		mockery.registerMock( 'lib/signup/actions', { submitSignupStep } );
-	} );
-
-	before( () => {
-		SubmitStepButton = require( '..' );
-	} );
-
 	it( 'should render buttonText prop within a child button', () => {
 		const wrapper = shallow( <SubmitStepButton buttonText="SubmitStepButton: buttonText" /> );
 
@@ -32,7 +27,13 @@ describe( 'SubmitStepButton', () => {
 
 	it( 'should trigger both submitSignupStep action creator and goToNextStep prop when clicked.', () => {
 		const goToNextStep = stub();
-		const wrapper = shallow( <SubmitStepButton buttonText="buttonText" stepName="test:step:1" goToNextStep={ goToNextStep } /> );
+		const wrapper = shallow(
+			<SubmitStepButton
+				buttonText="buttonText"
+				stepName="test:step:1"
+				goToNextStep={ goToNextStep }
+			/>
+		);
 
 		expect( submitSignupStep ).not.to.have.been.called;
 		expect( goToNextStep ).not.to.have.been.called;

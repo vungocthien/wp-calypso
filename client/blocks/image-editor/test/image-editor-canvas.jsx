@@ -1,38 +1,34 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
-import React, { Component } from 'react';
-import { shallow } from 'enzyme';
 import { expect } from 'chai';
+import { shallow } from 'enzyme';
+import React from 'react';
 
 /**
  * Internal dependencies
  */
-import useFakeDom from 'test/helpers/use-fake-dom';
-import useMockery from 'test/helpers/use-mockery';
+import { ImageEditorCanvas } from '../image-editor-canvas';
 
-class ImageEditorCropMock extends Component {
-	constructor( props ) {
-		super( props );
+jest.mock( 'blocks/image-editor/image-editor-crop', () => {
+	const { Component } = require( 'react' );
+
+	class ImageEditorCropMock extends Component {
+		render() {
+			return <dfn />;
+		}
 	}
-	render() {
-		return <dfn />;
-	}
-}
+
+	return ImageEditorCropMock;
+} );
 
 describe( 'ImageEditorToolbar', () => {
-	useFakeDom();
-
-	let ImageEditorCanvas,
-		wrapper;
-
-	useMockery( mockery => {
-		mockery.registerMock( './image-editor-crop', ImageEditorCropMock );
-	} );
-
-	before( () => {
-		ImageEditorCanvas = require( '../image-editor-canvas' ).ImageEditorCanvas;
-	} );
+	let wrapper;
 
 	beforeEach( () => {
 		wrapper = shallow( <ImageEditorCanvas isImageLoaded={ true } /> );

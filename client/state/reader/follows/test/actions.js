@@ -2,30 +2,26 @@
 /**
  * External dependencies
  */
-import useMockery from 'test/helpers/use-mockery';
-import sinon from 'sinon';
 import { expect } from 'chai';
+import sinon from 'sinon';
 
 /**
  * Internal dependencies
  */
+import { recordFollowError } from '../actions';
 import {
 	READER_RECORD_FOLLOW,
 	READER_RECORD_UNFOLLOW,
 	READER_FOLLOW_ERROR,
 } from 'state/action-types';
-import { recordFollowError } from '../actions';
+jest.mock( 'state/reader/posts/actions', () => ( {
+	receivePosts: posts => Promise.resolve( posts ),
+} ) );
 
 describe( 'actions', () => {
 	let recordFollow, recordUnfollow;
 
-	useMockery( mockery => {
-		mockery.registerMock( 'state/reader/posts/actions', {
-			receivePosts: posts => {
-				return Promise.resolve( posts );
-			},
-		} );
-
+	before( () => {
 		const actions = require( '../actions' );
 		recordFollow = actions.recordFollow;
 		recordUnfollow = actions.recordUnfollow;

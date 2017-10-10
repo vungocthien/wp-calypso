@@ -1,3 +1,4 @@
+/** @format */
 /**
  * External dependencies
  */
@@ -7,29 +8,18 @@ import { stub } from 'sinon';
 /**
  * Internal dependencies
  */
-import useMockery from 'test/helpers/use-mockery';
+import isUserRegistrationDaysWithinRange from '../is-user-registration-days-within-range';
+import { getCurrentUserDate } from 'state/current-user/selectors';
+jest.mock( 'state/current-user/selectors', () => ( {
+	getCurrentUserDate: require( 'sinon' ).stub(),
+} ) );
 
 describe( 'isUserRegistrationDaysWithinRange()', () => {
 	const state = 'state';
 	const registrationDate = 'registrationDate';
 	const moment = {
-		diff: stub()
+		diff: stub(),
 	};
-
-	let getCurrentUserDate;
-	let isUserRegistrationDaysWithinRange;
-
-	useMockery( mockery => {
-		getCurrentUserDate = stub();
-
-		mockery.registerMock( 'state/current-user/selectors', {
-			getCurrentUserDate,
-		} );
-	} );
-
-	before( () => {
-		isUserRegistrationDaysWithinRange = require( '../is-user-registration-days-within-range' );
-	} );
 
 	it( 'should return null when there is no current user date', () => {
 		getCurrentUserDate.withArgs( state ).returns( null );

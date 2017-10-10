@@ -1,14 +1,18 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
-import React from 'react';
 import { expect } from 'chai';
 import { shallow, mount } from 'enzyme';
+import React from 'react';
 
 /**
  * Internal dependencies
  */
-import useFakeDom from 'test/helpers/use-fake-dom';
 import { ForgotUsernameFormComponent } from '..';
 
 describe( 'ForgotUsername', () => {
@@ -30,14 +34,10 @@ describe( 'ForgotUsername', () => {
 	} );
 
 	context( 'fields', () => {
-		useFakeDom();
-
 		it( 'should be disabled when isRequesting is on', function() {
 			const wrapper = mount(
-				<ForgotUsernameFormComponent
-					className="test__test"
-					isRequesting={ true }
-				/> );
+				<ForgotUsernameFormComponent className="test__test" isRequesting={ true } />
+			);
 
 			// Expect the fields to be disabled
 			inputSelectors.forEach( selector => {
@@ -47,8 +47,6 @@ describe( 'ForgotUsername', () => {
 	} );
 
 	context( 'submit button', () => {
-		useFakeDom();
-
 		it( 'should be disabled if firstName is blank', function() {
 			const wrapper = mount( <ForgotUsernameFormComponent className="test__test" /> );
 			wrapper.setState( {
@@ -94,15 +92,14 @@ describe( 'ForgotUsername', () => {
 			} );
 
 			// Expect the button to be enabled
-			expect( wrapper.find( '.forgot-username-form__submit-button' ).prop( 'disabled' ) ).to.not.be.ok;
+			expect( wrapper.find( '.forgot-username-form__submit-button' ).prop( 'disabled' ) ).to.not.be
+				.ok;
 		} );
 
 		it( 'should be disabled when submitted', function() {
 			const wrapper = mount(
-				<ForgotUsernameFormComponent
-					className="test__test"
-					isRequesting={ true }
-				/> );
+				<ForgotUsernameFormComponent className="test__test" isRequesting={ true } />
+			);
 			wrapper.setState( {
 				firstName: 'Foo',
 				lastName: 'Bar',

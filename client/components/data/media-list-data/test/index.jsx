@@ -1,17 +1,27 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
-import React from 'react';
-import { shallow } from 'enzyme';
 import { expect } from 'chai';
-import mockery from 'mockery';
-import { noop } from 'lodash';
+import { shallow } from 'enzyme';
+import React from 'react';
 
 /**
  * Internal dependencies
  */
-import useFakeDom from 'test/helpers/use-fake-dom';
-import useMockery from 'test/helpers/use-mockery';
+import MediaListData from 'components/data/media-list-data';
+
+jest.mock( 'lib/media/actions', () => ( { setQuery: () => {}, fetchNextPage: () => {} } ) );
+jest.mock( 'lib/media/list-store', () => ( {
+	getAll: () => {},
+	hasNextPage: () => {},
+	isFetchingNextPage: () => {},
+	on: () => {},
+} ) );
 
 /**
  * Module variables
@@ -24,20 +34,12 @@ const EMPTY_COMPONENT = () => {
 };
 
 describe( 'EditorMediaModal', function() {
-	let MediaListData;
-
-	useMockery();
-	useFakeDom();
-
-	before( () => {
-		mockery.registerMock( 'lib/media/actions', { setQuery: noop, fetchNextPage: noop } );
-		mockery.registerMock( 'lib/media/list-store', { getAll: noop, hasNextPage: noop, isFetchingNextPage: noop, on: noop } );
-
-		MediaListData = require( 'components/data/media-list-data' );
-	} );
-
 	it( 'should pass search parameter to media query', () => {
-		const tree = shallow( <MediaListData siteId={ DUMMY_SITE_ID }><EMPTY_COMPONENT /></MediaListData> ).instance();
+		const tree = shallow(
+			<MediaListData siteId={ DUMMY_SITE_ID }>
+				<EMPTY_COMPONENT />
+			</MediaListData>
+		).instance();
 		const query = { search: true };
 		const result = tree.getQuery( query );
 
@@ -45,7 +47,11 @@ describe( 'EditorMediaModal', function() {
 	} );
 
 	it( 'should pass and process filter parameter to media query', () => {
-		const tree = shallow( <MediaListData siteId={ DUMMY_SITE_ID }><EMPTY_COMPONENT /></MediaListData> ).instance();
+		const tree = shallow(
+			<MediaListData siteId={ DUMMY_SITE_ID }>
+				<EMPTY_COMPONENT />
+			</MediaListData>
+		).instance();
 		const query = { filter: 'images' };
 		const result = tree.getQuery( query );
 
@@ -53,7 +59,11 @@ describe( 'EditorMediaModal', function() {
 	} );
 
 	it( 'should pass source parameter and set recent path to media query', () => {
-		const tree = shallow( <MediaListData siteId={ DUMMY_SITE_ID }><EMPTY_COMPONENT /></MediaListData> ).instance();
+		const tree = shallow(
+			<MediaListData siteId={ DUMMY_SITE_ID }>
+				<EMPTY_COMPONENT />
+			</MediaListData>
+		).instance();
 		const query = { source: 'anything' };
 		const result = tree.getQuery( query );
 

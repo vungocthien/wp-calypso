@@ -1,4 +1,9 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
 import { expect } from 'chai';
@@ -9,12 +14,10 @@ import { spy } from 'sinon';
 /**
  * Internal dependencies
  */
-import useFakeDom from 'test/helpers/use-fake-dom';
 import CloseOnEscape from '../';
 
-const simulateEscapeKeydown = () => (
-	document.dispatchEvent( new window.KeyboardEvent( 'keydown', { keyCode: 27 } ) )
-);
+const simulateEscapeKeydown = () =>
+	document.dispatchEvent( new window.KeyboardEvent( 'keydown', { keyCode: 27 } ) );
 
 describe( 'CloseOnEscape', () => {
 	describe( 'rendering', () => {
@@ -25,8 +28,6 @@ describe( 'CloseOnEscape', () => {
 	} );
 
 	describe( 'escape keydown event', () => {
-		useFakeDom();
-
 		it( 'calls the `onEscape` method of stacked components in LIFO order on each escape keydown', () => {
 			const onEscapeSpy = spy();
 

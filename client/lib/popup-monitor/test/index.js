@@ -1,4 +1,9 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
 import { expect } from 'chai';
@@ -6,20 +11,17 @@ import { expect } from 'chai';
 /**
  * Internal dependencies
  */
-import useFakeDom from 'test/helpers/use-fake-dom';
 import PopupMonitor from '../';
 
 describe( 'PopupMonitor', function() {
 	var popupMonitor;
-
-	useFakeDom();
 
 	before( () => {
 		Object.assign( global.window, {
 			screenTop: 0,
 			screenLeft: 0,
 			innerWidth: 1280,
-			innerHeight: 720
+			innerHeight: 720,
 		} );
 	} );
 

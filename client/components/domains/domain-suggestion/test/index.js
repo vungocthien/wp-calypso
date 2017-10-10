@@ -1,31 +1,22 @@
 /**
- * External Dependencies
+ * @format
+ * @jest-environment jsdom
  */
-import React from 'react';
-import { expect } from 'chai';
-import { shallow } from 'enzyme';
-import { identity, noop } from 'lodash';
 
 /**
- * Internal Dependencies
+ * External dependencies
  */
-import useFakeDom from 'test/helpers/use-fake-dom';
-import useMockery from 'test/helpers/use-mockery';
-import EmptyComponent from 'test/helpers/react/empty-component';
+import { expect } from 'chai';
+import { shallow } from 'enzyme';
+import { noop } from 'lodash';
+import React from 'react';
+
+/**
+ * Internal dependencies
+ */
+import DomainSuggestion from 'components/domains/domain-suggestion';
 
 describe( 'Domain Suggestion', function() {
-	let DomainSuggestion;
-
-	useFakeDom();
-	useMockery( ( mockery ) => {
-		mockery.registerMock( 'components/plans/premium-popover', EmptyComponent );
-	} );
-
-	before( () => {
-		DomainSuggestion = require( 'components/domains/domain-suggestion' );
-		DomainSuggestion.prototype.translate = identity;
-	} );
-
 	describe( 'has attributes', () => {
 		it( 'should have data-e2e-domain attribute for e2e testing', () => {
 			const domainSuggestion = shallow(
@@ -34,7 +25,8 @@ describe( 'Domain Suggestion', function() {
 					domain="example.com"
 					isAdded={ false }
 					onButtonClick={ noop }
-					priceRule="PRICE" />
+					priceRule="PRICE"
+				/>
 			);
 
 			expect( domainSuggestion.props()[ 'data-e2e-domain' ] ).to.equal( 'example.com' );

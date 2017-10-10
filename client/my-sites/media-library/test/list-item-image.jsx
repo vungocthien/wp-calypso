@@ -1,30 +1,27 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
 import { expect } from 'chai';
+import { shallow } from 'enzyme';
+import photon from 'photon';
 import React from 'react';
 
 /**
  * Internal dependencies
  */
-import useFakeDom from 'test/helpers/use-fake-dom';
-import useMockery from 'test/helpers/use-mockery';
-import photon from 'photon';
+import fixtures from './fixtures';
 import resize from 'lib/resize-image-url';
 import ListItemImage from 'my-sites/media-library/list-item-image';
 
 const WIDTH = 450;
 
 describe( 'MediaLibraryListItem image', function() {
-	let shallow, wrapper, fixtures;
-
-	useFakeDom();
-	useMockery();
-
-	before( function() {
-		shallow = require( 'enzyme' ).shallow;
-		fixtures = require( './fixtures' );
-	} );
+	let wrapper;
 
 	beforeEach( function() {
 		if ( wrapper ) {
@@ -34,12 +31,14 @@ describe( 'MediaLibraryListItem image', function() {
 
 	const getPhotonUrl = () => photon( fixtures.media[ 0 ].URL, { width: WIDTH } );
 	const getResizedUrl = () => resize( fixtures.media[ 0 ].URL, { w: WIDTH } );
-	const getItem = ( itemPos, type ) =>
+	const getItem = ( itemPos, type ) => (
 		<ListItemImage
 			media={ fixtures.media[ itemPos ] }
 			scale={ 1 }
 			maxImageWidth={ WIDTH }
-			thumbnailType={ type } />;
+			thumbnailType={ type }
+		/>
+	);
 
 	context( 'thumbnail display mode', function() {
 		it( 'defaults to photon when no thumbnail parameter is passed', function() {

@@ -1,16 +1,23 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
 import { expect } from 'chai';
 import { map } from 'lodash';
-import useFakeDom from 'test/helpers/use-fake-dom';
-import mockery from 'mockery';
 
 /**
  * Internal dependencies
  */
+import MediaUtils from '../utils';
 import JetpackSite from 'lib/site/jetpack';
-import useMockery from 'test/helpers/use-mockery';
+
+jest.mock( 'lib/impure-lodash', () => ( {
+	uniqueId: () => 'media-13',
+} ) );
 
 const UNIQUEID = 'media-13';
 const DUMMY_FILENAME = 'test.jpg';
@@ -28,7 +35,7 @@ const DUMMY_FILE_OBJECT = {
 	mime_type: 'image/jpeg',
 };
 const EXPECTED = {
-	'transient': true,
+	transient: true,
 	ID: UNIQUEID,
 	file: DUMMY_FILENAME,
 	title: 'test.jpg',
@@ -36,7 +43,7 @@ const EXPECTED = {
 	mime_type: 'image/jpeg',
 };
 const EXPECTED_FILE_OBJECT = {
-	'transient': true,
+	transient: true,
 	ID: UNIQUEID,
 	file: DUMMY_FILENAME,
 	title: 'test.jpg',
@@ -48,24 +55,6 @@ const EXPECTED_FILE_OBJECT = {
 };
 
 describe( 'MediaUtils', function() {
-	let MediaUtils;
-
-	useFakeDom();
-	useMockery();
-
-	before( () => {
-		mockery.registerMock( 'lib/impure-lodash', {
-			uniqueId: () => UNIQUEID,
-		} );
-
-		MediaUtils = require( '../utils' );
-	} );
-
-	after( function() {
-		mockery.deregisterAll();
-		mockery.disable();
-	} );
-
 	describe( '#url()', function() {
 		var media;
 
@@ -73,8 +62,8 @@ describe( 'MediaUtils', function() {
 			media = {
 				URL: 'https://secure.gravatar.com/blavatar/4e21d703d81809d215ceaabbf07efbc6',
 				thumbnails: {
-					thumbnail: 'https://secure.gravatar.com/blavatar/4e21d703d81809d215ceaabbf07efbc6?s=150'
-				}
+					thumbnail: 'https://secure.gravatar.com/blavatar/4e21d703d81809d215ceaabbf07efbc6?s=150',
+				},
 			};
 		} );
 
@@ -84,7 +73,7 @@ describe( 'MediaUtils', function() {
 			media.transient = true;
 
 			url = MediaUtils.url( media, {
-				maxWidth: 450
+				maxWidth: 450,
 			} );
 
 			expect( url ).to.equal( media.URL );
@@ -98,42 +87,51 @@ describe( 'MediaUtils', function() {
 
 		it( 'should accept a photon option to use the photon service', function() {
 			var url = MediaUtils.url( media, {
-				photon: true
+				photon: true,
 			} );
 
-			expect( url ).to.equal( 'https://i2.wp.com/secure.gravatar.com/blavatar/4e21d703d81809d215ceaabbf07efbc6?ssl=1' );
+			expect( url ).to.equal(
+				'https://i2.wp.com/secure.gravatar.com/blavatar/4e21d703d81809d215ceaabbf07efbc6?ssl=1'
+			);
 		} );
 
 		it( 'should generate the correct width-constrained photon URL', function() {
 			var url = MediaUtils.url( media, {
 				photon: true,
-				maxWidth: 450
+				maxWidth: 450,
 			} );
 
-			expect( url ).to.equal( 'https://i2.wp.com/secure.gravatar.com/blavatar/4e21d703d81809d215ceaabbf07efbc6?ssl=1&w=450' );
+			expect( url ).to.equal(
+				'https://i2.wp.com/secure.gravatar.com/blavatar/4e21d703d81809d215ceaabbf07efbc6?ssl=1&w=450'
+			);
 		} );
 
 		it( 'should generate the correct width-constrained URL', function() {
 			var url = MediaUtils.url( media, {
-				maxWidth: 450
+				maxWidth: 450,
 			} );
 
-			expect( url ).to.equal( 'https://secure.gravatar.com/blavatar/4e21d703d81809d215ceaabbf07efbc6?w=450' );
+			expect( url ).to.equal(
+				'https://secure.gravatar.com/blavatar/4e21d703d81809d215ceaabbf07efbc6?w=450'
+			);
 		} );
 
 		it( 'should attempt to find and return a desired thumbnail size', function() {
 			var url = MediaUtils.url( media, {
-				size: 'thumbnail'
+				size: 'thumbnail',
 			} );
 
 			expect( url ).to.equal( media.thumbnails.thumbnail );
 		} );
 
 		it( 'should gracefully handle empty media objects', function() {
-			var url = MediaUtils.url( {}, {
-				size: 'thumbnail',
-				maxWidth: 450
-			} );
+			var url = MediaUtils.url(
+				{},
+				{
+					size: 'thumbnail',
+					maxWidth: 450,
+				}
+			);
 
 			expect( url ).to.be.undefined;
 		} );
@@ -153,11 +151,15 @@ describe( 'MediaUtils', function() {
 		} );
 
 		it( 'should detect extension from HTML5 File object', function() {
-			expect( MediaUtils.getFileExtension( new window.File( [ '' ], 'example.gif' ) ) ).to.equal( 'gif' );
+			expect( MediaUtils.getFileExtension( new window.File( [ '' ], 'example.gif' ) ) ).to.equal(
+				'gif'
+			);
 		} );
 
 		it( 'should detect extension from HTML5 File object with reserved url chars', function() {
-			expect( MediaUtils.getFileExtension( new window.File( [ '' ], 'example#?#?.gif' ) ) ).to.equal( 'gif' );
+			expect(
+				MediaUtils.getFileExtension( new window.File( [ '' ], 'example#?#?.gif' ) )
+			).to.equal( 'gif' );
 		} );
 
 		it( 'should detect extension from object file property', function() {
@@ -177,12 +179,14 @@ describe( 'MediaUtils', function() {
 		} );
 
 		it( 'should detect extension from URL string with query parameters', function() {
-			expect( MediaUtils.getFileExtension( 'https://example.com/example.gif?w=110' ) ).to.equal( 'gif' );
+			expect( MediaUtils.getFileExtension( 'https://example.com/example.gif?w=110' ) ).to.equal(
+				'gif'
+			);
 		} );
 	} );
 
 	describe( '#getMimePrefix()', function() {
-		it( 'should return undefined if a mime type can\'t be determined', function() {
+		it( "should return undefined if a mime type can't be determined", function() {
 			expect( MediaUtils.getMimePrefix() ).to.be.undefined;
 		} );
 
@@ -196,12 +200,14 @@ describe( 'MediaUtils', function() {
 			expect( MediaUtils.getMimeType() ).to.be.undefined;
 		} );
 
-		it( 'should return undefined if detected extension doesn\'t exist in mime_types', function() {
+		it( "should return undefined if detected extension doesn't exist in mime_types", function() {
 			expect( MediaUtils.getMimeType( 'file.badextension' ) ).to.be.undefined;
 		} );
 
 		it( 'should return an object mime type', function() {
-			expect( MediaUtils.getMimeType( { mime_type: 'application/fake' } ) ).to.equal( 'application/fake' );
+			expect( MediaUtils.getMimeType( { mime_type: 'application/fake' } ) ).to.equal(
+				'application/fake'
+			);
 		} );
 
 		it( 'should detect mime type from string extension', function() {
@@ -217,7 +223,9 @@ describe( 'MediaUtils', function() {
 		} );
 
 		it( 'should detect mime type from HTML5 File object', function() {
-			expect( MediaUtils.getMimeType( new window.File( [ '' ], 'example.gif', { type: 'image/gif' } ) ) ).to.equal( 'image/gif' );
+			expect(
+				MediaUtils.getMimeType( new window.File( [ '' ], 'example.gif', { type: 'image/gif' } ) )
+			).to.equal( 'image/gif' );
 		} );
 
 		it( 'should detect mime type from object file property', function() {
@@ -233,7 +241,9 @@ describe( 'MediaUtils', function() {
 		} );
 
 		it( 'should ignore query string parameters in URL strings', function() {
-			expect( MediaUtils.getMimeType( 'https://example.com/example.gif?w=110' ) ).to.equal( 'image/gif' );
+			expect( MediaUtils.getMimeType( 'https://example.com/example.gif?w=110' ) ).to.equal(
+				'image/gif'
+			);
 		} );
 
 		it( 'should detect mime type from object guid property', function() {
@@ -247,20 +257,13 @@ describe( 'MediaUtils', function() {
 
 	describe( '#filterItemsByMimePrefix()', function() {
 		it( 'should return an array filtered to the matching mime prefix', function() {
-			var items = [
-				{ ID: 100, mime_type: 'image/jpg' },
-				{ ID: 200, mime_type: 'video/mp4' }
-			];
+			var items = [ { ID: 100, mime_type: 'image/jpg' }, { ID: 200, mime_type: 'video/mp4' } ];
 
 			expect( MediaUtils.filterItemsByMimePrefix( items, 'image' ) ).to.eql( [ items[ 0 ] ] );
 		} );
 
 		it( 'should gracefully omit items where a mime type could not be determined', function() {
-			var items = [
-				{ ID: 100, mime_type: 'image/jpg' },
-				{ ID: 200 },
-				undefined
-			];
+			var items = [ { ID: 100, mime_type: 'image/jpg' }, { ID: 200 }, undefined ];
 
 			expect( MediaUtils.filterItemsByMimePrefix( items, 'image' ) ).to.eql( [ items[ 0 ] ] );
 		} );
@@ -272,7 +275,7 @@ describe( 'MediaUtils', function() {
 		beforeEach( function() {
 			items = [
 				{ ID: 1, date: '2015-06-19T09:36:09-04:00' },
-				{ ID: 2, date: '2015-06-19T11:36:09-04:00' }
+				{ ID: 2, date: '2015-06-19T11:36:09-04:00' },
 			];
 		} );
 
@@ -280,7 +283,7 @@ describe( 'MediaUtils', function() {
 			expect( map( MediaUtils.sortItemsByDate( items ), 'ID' ) ).to.eql( [ 2, 1 ] );
 		} );
 
-		it( 'should return the item with the the greater ID if the dates are not set', function() {
+		it( 'should return the item with the greater ID if the dates are not set', function() {
 			items = items.map( function( item ) {
 				item.date = null;
 				return item;
@@ -289,7 +292,7 @@ describe( 'MediaUtils', function() {
 			expect( map( MediaUtils.sortItemsByDate( items ), 'ID' ) ).to.eql( [ 2, 1 ] );
 		} );
 
-		it( 'should return the item with the the greater ID if the dates are equal', function() {
+		it( 'should return the item with the greater ID if the dates are equal', function() {
 			items = items.map( function( item ) {
 				item.date = '2015-06-19T09:36:09-04:00';
 				return item;
@@ -324,8 +327,8 @@ describe( 'MediaUtils', function() {
 		it( 'should return an array of supported file type extensions', function() {
 			var extensions = MediaUtils.getAllowedFileTypesForSite( {
 				options: {
-					allowed_file_types: [ 'pdf', 'gif' ]
-				}
+					allowed_file_types: [ 'pdf', 'gif' ],
+				},
 			} );
 
 			expect( extensions ).to.be.contain( 'pdf' );
@@ -336,8 +339,8 @@ describe( 'MediaUtils', function() {
 	describe( '#isSupportedFileTypeForSite()', function() {
 		var site = {
 			options: {
-				allowed_file_types: [ 'pdf', 'gif' ]
-			}
+				allowed_file_types: [ 'pdf', 'gif' ],
+			},
 		};
 
 		it( 'should return false for a falsey item', function() {
@@ -348,7 +351,7 @@ describe( 'MediaUtils', function() {
 			expect( MediaUtils.isSupportedFileTypeForSite( {}, null ) ).to.be.false;
 		} );
 
-		it( 'should return false if the site doesn\'t support the item\'s extension', function() {
+		it( "should return false if the site doesn't support the item's extension", function() {
 			var item = { extension: 'avi' },
 				isSupported = MediaUtils.isSupportedFileTypeForSite( item, site );
 
@@ -356,17 +359,20 @@ describe( 'MediaUtils', function() {
 		} );
 
 		it( 'should return true for versions of Jetpack where option is not synced', function() {
-			var isSupported = MediaUtils.isSupportedFileTypeForSite( { extension: 'exe' }, new JetpackSite( {
-				jetpack: true,
-				options: {
-					jetpack_version: '3.8.0'
-				}
-			} ) );
+			var isSupported = MediaUtils.isSupportedFileTypeForSite(
+				{ extension: 'exe' },
+				new JetpackSite( {
+					jetpack: true,
+					options: {
+						jetpack_version: '3.8.0',
+					},
+				} )
+			);
 
 			expect( isSupported ).to.be.true;
 		} );
 
-		it( 'should return true if the site supports the item\'s extension', function() {
+		it( "should return true if the site supports the item's extension", function() {
 			var item = { extension: 'pdf' },
 				isSupported = MediaUtils.isSupportedFileTypeForSite( item, site );
 
@@ -385,8 +391,8 @@ describe( 'MediaUtils', function() {
 		const site = {
 			jetpack: false,
 			options: {
-				max_upload_size: 1024
-			}
+				max_upload_size: 1024,
+			},
 		};
 		const jetpackSite = new JetpackSite( {
 			jetpack: true,
@@ -394,7 +400,7 @@ describe( 'MediaUtils', function() {
 			options: {
 				jetpack_version: '4.5',
 				max_upload_size: 1024,
-			}
+			},
 		} );
 
 		it( 'should return null if the provided `bytes` are not numeric', function() {
@@ -406,44 +412,63 @@ describe( 'MediaUtils', function() {
 		} );
 
 		it( 'should return null if the site `max_upload_size` is `false`', function() {
-			const isAcceptableSize = MediaUtils.isExceedingSiteMaxUploadSize( { size: 1024 }, {
-				options: {
-					max_upload_size: false
+			const isAcceptableSize = MediaUtils.isExceedingSiteMaxUploadSize(
+				{ size: 1024 },
+				{
+					options: {
+						max_upload_size: false,
+					},
 				}
-			} );
+			);
 
 			expect( isAcceptableSize ).to.be.null;
 		} );
 
 		it( 'should return null if a video is being uploaded for a Jetpack site with VideoPress enabled', function() {
-			expect( MediaUtils.isExceedingSiteMaxUploadSize( { size: 1024, mime_type: 'video/mp4' }, jetpackSite ) ).to.be.null;
+			expect(
+				MediaUtils.isExceedingSiteMaxUploadSize(
+					{ size: 1024, mime_type: 'video/mp4' },
+					jetpackSite
+				)
+			).to.be.null;
 		} );
 
 		it( 'should not return null if a video is being uploaded for a pre-4.5 Jetpack site with VideoPress enabled', function() {
-			const isAcceptableSize = MediaUtils.isExceedingSiteMaxUploadSize( { size: 1024, mime_type: 'video/mp4' }, new JetpackSite( {
-				jetpack: true,
-				modules: [ 'videopress' ],
-				options: {
-					jetpack_version: '3.8.1',
-					max_upload_size: 1024,
-				}
-			} ) );
+			const isAcceptableSize = MediaUtils.isExceedingSiteMaxUploadSize(
+				{ size: 1024, mime_type: 'video/mp4' },
+				new JetpackSite( {
+					jetpack: true,
+					modules: [ 'videopress' ],
+					options: {
+						jetpack_version: '3.8.1',
+						max_upload_size: 1024,
+					},
+				} )
+			);
 
 			expect( isAcceptableSize ).to.not.be.null;
 		} );
 
 		it( 'should not return null if an image is being uploaded for a Jetpack site with VideoPress enabled', function() {
-			expect( MediaUtils.isExceedingSiteMaxUploadSize( { size: 1024, mime_type: 'image/jpeg' }, jetpackSite ) ).to.not.be.null;
+			expect(
+				MediaUtils.isExceedingSiteMaxUploadSize(
+					{ size: 1024, mime_type: 'image/jpeg' },
+					jetpackSite
+				)
+			).to.not.be.null;
 		} );
 
 		it( 'should not return null if a video is being uploaded for a Jetpack site with VideoPress disabled', function() {
-			const isAcceptableSize = MediaUtils.isExceedingSiteMaxUploadSize( { size: 1024, mime_type: 'video/mp4' }, new JetpackSite( {
-				jetpack: true,
-				options: {
-					jetpack_version: '4.5',
-					max_upload_size: 1024,
-				}
-			} ) );
+			const isAcceptableSize = MediaUtils.isExceedingSiteMaxUploadSize(
+				{ size: 1024, mime_type: 'video/mp4' },
+				new JetpackSite( {
+					jetpack: true,
+					options: {
+						jetpack_version: '4.5',
+						max_upload_size: 1024,
+					},
+				} )
+			);
 
 			expect( isAcceptableSize ).to.not.be.null;
 		} );
@@ -523,22 +548,22 @@ describe( 'MediaUtils', function() {
 			var dimensions = MediaUtils.getThumbnailSizeDimensions( 'thumbnail', {
 				options: {
 					image_thumbnail_width: 200,
-					image_thumbnail_height: 200
-				}
+					image_thumbnail_height: 200,
+				},
 			} );
 
 			expect( dimensions ).to.eql( {
 				width: 200,
-				height: 200
+				height: 200,
 			} );
 		} );
 
-		it( 'should return default values if site doesn\'t exist', function() {
+		it( "should return default values if site doesn't exist", function() {
 			var dimensions = MediaUtils.getThumbnailSizeDimensions( 'thumbnail' );
 
 			expect( dimensions ).to.eql( {
 				width: 150,
-				height: 150
+				height: 150,
 			} );
 		} );
 
@@ -547,7 +572,7 @@ describe( 'MediaUtils', function() {
 
 			expect( dimensions ).to.eql( {
 				width: undefined,
-				height: undefined
+				height: undefined,
 			} );
 		} );
 	} );
@@ -563,7 +588,7 @@ describe( 'MediaUtils', function() {
 			var value = MediaUtils.generateGalleryShortcode( {
 				items: [ { ID: 100 }, { ID: 200 } ],
 				type: 'square',
-				columns: 2
+				columns: 2,
 			} );
 
 			expect( value ).to.equal( '[gallery ids="100,200" type="square" columns="2"]' );
@@ -573,7 +598,7 @@ describe( 'MediaUtils', function() {
 			var value = MediaUtils.generateGalleryShortcode( {
 				items: [ { ID: 100 }, { ID: 200 } ],
 				type: 'rectangular',
-				columns: 2
+				columns: 2,
 			} );
 
 			expect( value ).to.equal( '[gallery ids="100,200" type="rectangular"]' );
@@ -587,8 +612,8 @@ describe( 'MediaUtils', function() {
 			const user = { ID: 73705554 };
 			const site = {
 				capabilities: {
-					delete_posts: false
-				}
+					delete_posts: false,
+				},
 			};
 
 			expect( MediaUtils.canUserDeleteItem( item, user, site ) ).to.be.false;
@@ -598,8 +623,8 @@ describe( 'MediaUtils', function() {
 			const user = { ID: 73705554 };
 			const site = {
 				capabilities: {
-					delete_posts: true
-				}
+					delete_posts: true,
+				},
 			};
 
 			expect( MediaUtils.canUserDeleteItem( item, user, site ) ).to.be.true;
@@ -609,8 +634,8 @@ describe( 'MediaUtils', function() {
 			const user = { ID: 73705672 };
 			const site = {
 				capabilities: {
-					delete_others_posts: false
-				}
+					delete_others_posts: false,
+				},
 			};
 
 			expect( MediaUtils.canUserDeleteItem( item, user, site ) ).to.be.false;
@@ -620,8 +645,8 @@ describe( 'MediaUtils', function() {
 			const user = { ID: 73705672 };
 			const site = {
 				capabilities: {
-					delete_others_posts: true
-				}
+					delete_others_posts: true,
+				},
 			};
 
 			expect( MediaUtils.canUserDeleteItem( item, user, site ) ).to.be.true;
@@ -634,7 +659,7 @@ describe( 'MediaUtils', function() {
 		} );
 
 		it( 'should return true if the item is currently being uploaded', () => {
-			const item = { 'transient': true };
+			const item = { transient: true };
 
 			expect( MediaUtils.isItemBeingUploaded( item ) ).to.be.true;
 		} );
@@ -650,9 +675,11 @@ describe( 'MediaUtils', function() {
 		const GUID = 'URL';
 
 		beforeEach( () => {
-			window.URL = { createObjectURL: () => {
-				return GUID;
-			} };
+			window.URL = {
+				createObjectURL: () => {
+					return GUID;
+				},
+			};
 		} );
 
 		it( 'should return a transient for a file blob', () => {

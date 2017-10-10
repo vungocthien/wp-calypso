@@ -1,10 +1,14 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
-import React from 'react';
-import useFakeDom from 'test/helpers/use-fake-dom';
-import { shallow } from 'enzyme';
 import { expect } from 'chai';
+import { shallow } from 'enzyme';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -12,8 +16,6 @@ import { expect } from 'chai';
 import ProgressBar from '../';
 
 describe( 'ProgressBar', function() {
-	useFakeDom();
-
 	it( 'should show the title', function() {
 		const progressBar = shallow( <ProgressBar value={ 20 } title="foo" /> );
 
@@ -47,17 +49,23 @@ describe( 'ProgressBar', function() {
 	it( 'should properly calculate the width percentage', function() {
 		const progressBar = shallow( <ProgressBar value={ 20 } total={ 40 } /> );
 
-		expect( progressBar.find( '.progress-bar__progress' ).props().style.width ).to.be.equal( '50%' );
+		expect( progressBar.find( '.progress-bar__progress' ).props().style.width ).to.be.equal(
+			'50%'
+		);
 	} );
 
 	it( 'should have the color provided by the color property', function() {
 		const progressBar = shallow( <ProgressBar value={ 20 } color="red" /> );
 
-		expect( progressBar.find( '.progress-bar__progress' ).props().style.backgroundColor ).to.be.equal( 'red' );
+		expect(
+			progressBar.find( '.progress-bar__progress' ).props().style.backgroundColor
+		).to.be.equal( 'red' );
 	} );
 
 	it( 'should not be able to be more than 100% complete', () => {
-		const progressBar = shallow( <ProgressBar value={ 240 }/> );
-		expect( progressBar.find( '.progress-bar__progress' ).props().style.width ).to.be.equal( '100%' );
+		const progressBar = shallow( <ProgressBar value={ 240 } /> );
+		expect( progressBar.find( '.progress-bar__progress' ).props().style.width ).to.be.equal(
+			'100%'
+		);
 	} );
 } );

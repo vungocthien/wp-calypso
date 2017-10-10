@@ -1,4 +1,9 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
 import { assert, expect } from 'chai';
@@ -6,23 +11,14 @@ import { assert, expect } from 'chai';
 /**
  * Internal dependencies
  */
-import useFakeDom from 'test/helpers/use-fake-dom';
-import useMockery from 'test/helpers/use-mockery';
-import wpMock from './mocks/wp';
-import userUtilsMock from './mocks/user-utils';
+import userSettings from '..';
+
+jest.mock( 'lib/localforage', () => require( 'lib/localforage/localforage-bypass' ) );
+jest.mock( 'lib/wp', () => require( './mocks/wp' ) );
+jest.mock( 'lib/user/utils', () => require( './mocks/user-utils' ) );
 
 describe( 'User Settings', () => {
-	let userSettings;
-
-	useMockery( mockery => {
-		mockery.registerMock( 'lib/wp', wpMock );
-		mockery.registerMock( 'lib/user/utils', userUtilsMock );
-	} );
-
-	useFakeDom();
-
 	before( () => {
-		userSettings = require( '..' );
 		userSettings.fetchSettings();
 	} );
 
@@ -100,5 +96,4 @@ describe( 'User Settings', () => {
 			done();
 		}
 	} );
-
 } );

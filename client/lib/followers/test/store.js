@@ -1,20 +1,26 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
-var assert = require( 'chai' ).assert;
+import { assert } from 'chai';
 
 /**
  * Internal dependencies
  */
-var actions = require( './lib/mock-actions' ),
-	site = require( './lib/mock-site' ),
-	options = { siteId: site.ID },
-	useFakeDom = require( 'test/helpers/use-fake-dom' );
+import actions from './lib/mock-actions';
+import site from './lib/mock-site';
+
+/**
+ * Internal dependencies
+ */
+const options = { siteId: site.ID };
 
 describe( 'WPCOM Followers Store', function() {
 	var Dispatcher, FollowersStore;
-
-	useFakeDom();
 
 	beforeEach( function() {
 		Dispatcher = require( 'dispatcher' );

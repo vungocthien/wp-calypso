@@ -1,4 +1,9 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
 import { assert } from 'chai';
@@ -6,15 +11,12 @@ import { assert } from 'chai';
 /**
  * Internal dependencies
  */
-import useFakeDom from 'test/helpers/use-fake-dom';
 import actions from './fixtures/actions';
 import site from './fixtures/site';
 
 describe( 'Viewers Store', () => {
 	const siteId = site.ID;
 	let Dispatcher, ViewersStore;
-
-	useFakeDom();
 
 	beforeEach( () => {
 		Dispatcher = require( 'dispatcher' );
@@ -40,7 +42,7 @@ describe( 'Viewers Store', () => {
 	} );
 
 	describe( 'Get Viewers', () => {
-		it( 'Should return false when viewers haven\'t been fetched', () => {
+		it( "Should return false when viewers haven't been fetched", () => {
 			const viewers = ViewersStore.getViewers( siteId );
 
 			assert.isFalse( viewers, 'viewers is false' );

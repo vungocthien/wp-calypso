@@ -1,34 +1,28 @@
 /** @format */
 /**
- * External Dependencies
+ * External dependencies
  */
 import { expect } from 'chai';
 import sinon from 'sinon';
 
 /**
- * Internal Dependencies
+ * Internal dependencies
  */
-import useNock from 'test/helpers/use-nock';
-import useMockery from 'test/helpers/use-mockery';
+import { requestRelatedPosts } from '../actions';
 import {
 	READER_RELATED_POSTS_REQUEST,
 	READER_RELATED_POSTS_REQUEST_SUCCESS,
 	READER_RELATED_POSTS_REQUEST_FAILURE,
 	READER_RELATED_POSTS_RECEIVE,
 } from 'state/action-types';
+import useNock from 'test/helpers/use-nock';
+jest.mock( 'state/reader/posts/actions', () => ( {
+	receivePosts( posts ) {
+		return Promise.resolve( posts );
+	},
+} ) );
 
 describe( 'actions', () => {
-	let requestRelatedPosts;
-	useMockery( mockery => {
-		mockery.registerMock( 'state/reader/posts/actions', {
-			receivePosts( posts ) {
-				return Promise.resolve( posts );
-			},
-		} );
-
-		requestRelatedPosts = require( '../actions' ).requestRelatedPosts;
-	} );
-
 	describe( 'success', () => {
 		useNock( nock => {
 			nock( 'https://public-api.wordpress.com:443' )
@@ -123,14 +117,16 @@ describe( 'actions', () => {
 		} );
 
 		it( 'should have dispatched receive with an empty array', () => {
-			expect( fakeDispatch ).to.have.been.calledWith( {
-				type: READER_RELATED_POSTS_RECEIVE,
-				payload: {
-					siteId: 1,
-					postId: 1,
-					scope: 'all',
-					posts: [],
-				},
+			return requestPromise.catch( () => {
+				expect( fakeDispatch ).to.have.been.calledWith( {
+					type: READER_RELATED_POSTS_RECEIVE,
+					payload: {
+						siteId: 1,
+						postId: 1,
+						scope: 'all',
+						posts: [],
+					},
+				} );
 			} );
 		} );
 

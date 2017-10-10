@@ -1,39 +1,42 @@
 /**
- * External Dependencies
+ * @format
+ * @jest-environment jsdom
  */
-import React from 'react';
+
+/**
+ * External dependencies
+ */
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
-import { spy } from 'sinon';
+import pageSpy from 'page';
+import React from 'react';
 
 /**
  * Internal dependencies
  */
-import useFakeDom from 'test/helpers/use-fake-dom';
-import useMockery from 'test/helpers/use-mockery';
+import { MapDomain } from '..';
+import MapDomainStep from 'components/domains/map-domain-step';
+import HeaderCake from 'components/header-cake';
 import paths from 'my-sites/domains/paths';
 
-describe( 'MapDomain component', () => {
+jest.mock( 'lib/user', () => () => {} );
+jest.mock( 'page', () => {
+	const { spy } = require( 'sinon' );
 	const pageSpy = spy();
+
 	pageSpy.redirect = spy();
-	let MapDomain, MapDomainStep, HeaderCake;
 
-	// needed, because some dependency of dependency uses `window`
-	useFakeDom();
+	return pageSpy;
+} );
 
-	useMockery( ( mockery ) => {
-		mockery.registerMock( 'page', pageSpy );
-		MapDomain = require( '..' ).MapDomain;
-		MapDomainStep = require( 'components/domains/map-domain-step' );
-		HeaderCake = require( 'components/header-cake' );
-	} );
-
+describe( 'MapDomain component', () => {
 	beforeEach( () => {
 		pageSpy.reset();
 		pageSpy.redirect.reset();
 	} );
 
 	const defaultProps = {
+		cart: {},
 		productsList: {},
 		domainsWithPlansOnly: false,
 		translate: string => string,
@@ -79,8 +82,13 @@ describe( 'MapDomain component', () => {
 	} );
 
 	it( 'goes back to domain management for VIP sites', () => {
-		const wrapper = shallow( <MapDomain { ...defaultProps } selectedSiteSlug="baba"
-											selectedSite={ { ...defaultProps.selectedSite, is_vip: true } } /> );
+		const wrapper = shallow(
+			<MapDomain
+				{ ...defaultProps }
+				selectedSiteSlug="baba"
+				selectedSite={ { ...defaultProps.selectedSite, is_vip: true } }
+			/>
+		);
 		wrapper.instance().goBack();
 		expect( pageSpy ).to.have.been.calledWith( paths.domainManagementList( 'baba' ) );
 	} );

@@ -1,8 +1,11 @@
-/** IMPORTANT NOTE BEFORE EDITING THIS FILE **
+/**
+ *  IMPORTANT NOTE BEFORE EDITING THIS FILE **
  *
  * We're in the process of moving the side-effecting logic (anything to do with connection)
  * into Redux middleware. If you're implementing something new or changing something,
  * please consider moving any related side-effects into middleware.js.
+ *
+ * @format
  */
 
 /**
@@ -25,15 +28,17 @@ import {
 	HAPPYCHAT_SET_MESSAGE,
 	HAPPYCHAT_TRANSCRIPT_RECEIVE,
 	HAPPYCHAT_TRANSCRIPT_REQUEST,
-	HAPPYCHAT_SET_GEO_LOCATION,
 } from 'state/action-types';
 
 export const setHappychatChatStatus = status => ( {
-	type: HAPPYCHAT_SET_CHAT_STATUS, status
+	type: HAPPYCHAT_SET_CHAT_STATUS,
+	status,
 } );
 export const requestChatTranscript = () => ( { type: HAPPYCHAT_TRANSCRIPT_REQUEST } );
 export const receiveChatTranscript = ( messages, timestamp ) => ( {
-	type: HAPPYCHAT_TRANSCRIPT_RECEIVE, messages, timestamp
+	type: HAPPYCHAT_TRANSCRIPT_RECEIVE,
+	messages,
+	timestamp,
 } );
 
 export const initialize = () => ( { type: HAPPYCHAT_INITIALIZE } );
@@ -42,12 +47,15 @@ export const blur = () => ( { type: HAPPYCHAT_BLUR } );
 export const focus = () => ( { type: HAPPYCHAT_FOCUS } );
 
 export const connectChat = () => ( { type: HAPPYCHAT_CONNECT } );
-export const setConnected = () => ( { type: HAPPYCHAT_CONNECTED } );
+export const setConnected = ( user ) => ( { type: HAPPYCHAT_CONNECTED, user } );
 export const setConnecting = () => ( { type: HAPPYCHAT_CONNECTING } );
 export const setDisconnected = errorStatus => ( { type: HAPPYCHAT_DISCONNECTED, errorStatus } );
 export const setReconnecting = () => ( { type: HAPPYCHAT_RECONNECTING } );
 
-export const setHappychatAvailable = isAvailable => ( { type: HAPPYCHAT_SET_AVAILABLE, isAvailable } );
+export const setHappychatAvailable = isAvailable => ( {
+	type: HAPPYCHAT_SET_AVAILABLE,
+	isAvailable,
+} );
 
 export const setChatMessage = message => ( { type: HAPPYCHAT_SET_MESSAGE, message } );
 export const clearChatMessage = () => setChatMessage( '' );
@@ -67,22 +75,8 @@ export const sendUserInfo = ( howCanWeHelp, howYouFeel, site ) => {
 		type: HAPPYCHAT_SEND_USER_INFO,
 		howCanWeHelp,
 		howYouFeel,
-		site
+		site,
 	};
 };
 
 export const sendChatMessage = message => ( { type: HAPPYCHAT_SEND_MESSAGE, message } );
-
-/**
- * Returns an action object to be used in signalling that the current user geo location
- * has been set.
- *
- * @param  {Object} geoLocation Geo location information based on ip
- * @return {Object}        Action object
- */
-export function setGeoLocation( geoLocation ) {
-	return {
-		type: HAPPYCHAT_SET_GEO_LOCATION,
-		geoLocation
-	};
-}

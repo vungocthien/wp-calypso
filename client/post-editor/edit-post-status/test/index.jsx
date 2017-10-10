@@ -1,35 +1,24 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
-import React from 'react';
 import { expect } from 'chai';
-import { noop } from 'lodash';
 import { shallow } from 'enzyme';
+import { noop } from 'lodash';
+import React from 'react';
 
 /**
  * Internal dependencies
  */
-import useFakeDom from 'test/helpers/use-fake-dom';
-import useMockery from 'test/helpers/use-mockery';
+import { EditPostStatus } from '../';
+
+jest.mock( 'lib/user', () => () => {} );
 
 describe( 'EditPostStatus', function() {
-	let EditPostStatus;
-
-	useFakeDom();
-	useMockery();
-
-	useMockery( mockery => {
-		mockery.registerMock( 'lib/wp', {
-			me: () => ( {
-				get: noop
-			} )
-		} );
-	} );
-
-	before( function() {
-		EditPostStatus = require( '../' ).EditPostStatus;
-	} );
-
 	it( 'should hide sticky option for password protected posts', function() {
 		const wrapper = shallow(
 			<EditPostStatus post={ { password: 'password' } } isPostPrivate={ false } type={ 'post' } />
@@ -48,7 +37,12 @@ describe( 'EditPostStatus', function() {
 
 	it( 'should show sticky option for published posts', function() {
 		const wrapper = shallow(
-			<EditPostStatus post={ { password: '' } } type={ 'post' } isPostPrivate={ false } translate={ noop } />
+			<EditPostStatus
+				post={ { password: '' } }
+				type={ 'post' }
+				isPostPrivate={ false }
+				translate={ noop }
+			/>
 		);
 
 		expect( wrapper.find( '.edit-post-status__sticky' ) ).to.have.lengthOf( 1 );

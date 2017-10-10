@@ -1,31 +1,26 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
 import assert from 'assert';
-import { assign, isEqual, noop } from 'lodash';
+import { assign, isEqual } from 'lodash';
 import { spy } from 'sinon';
 
 /**
  * Internal dependencies
  */
-import useFakeDom from 'test/helpers/use-fake-dom';
-import useMockery from 'test/helpers/use-mockery';
+import Dispatcher from 'dispatcher';
+
+jest.mock( 'lib/user', () => () => {} );
 
 describe( 'post-edit-store', function() {
-	let Dispatcher, PostEditStore, dispatcherCallback;
-
-	useFakeDom();
-
-	useMockery( mockery => {
-		mockery.registerMock( 'lib/wp', {
-			me: () => ( {
-				get: noop
-			} )
-		} );
-	} );
+	let PostEditStore, dispatcherCallback;
 
 	before( () => {
-		Dispatcher = require( 'dispatcher' );
 		spy( Dispatcher, 'register' );
 		PostEditStore = require( '../post-edit-store' );
 		dispatcherCallback = Dispatcher.register.lastCall.args[ 0 ];
@@ -46,11 +41,11 @@ describe( 'post-edit-store', function() {
 					categories: {
 						Unicorns: {
 							ID: 199,
-							name: 'Unicorns'
-						}
-					}
-				}
-			}
+							name: 'Unicorns',
+						},
+					},
+				},
+			},
 		} );
 	}
 
@@ -60,8 +55,8 @@ describe( 'post-edit-store', function() {
 		dispatcherCallback( {
 			action: {
 				type: 'DRAFT_NEW_POST',
-				siteId: siteId
-			}
+				siteId: siteId,
+			},
 		} );
 
 		assert( PostEditStore.getSavedPost().ID === undefined );
@@ -79,8 +74,8 @@ describe( 'post-edit-store', function() {
 			action: {
 				type: 'START_EDITING_POST',
 				siteId: siteId,
-				postId: postId
-			}
+				postId: postId,
+			},
 		} );
 
 		assert( ! PostEditStore.isNew() );
@@ -96,8 +91,8 @@ describe( 'post-edit-store', function() {
 		dispatcherCallback( {
 			action: {
 				type: 'DRAFT_NEW_POST',
-				title: 'Ribs &amp; Chicken'
-			}
+				title: 'Ribs &amp; Chicken',
+			},
 		} );
 
 		assert( PostEditStore.get().title === 'Ribs & Chicken' );
@@ -109,9 +104,9 @@ describe( 'post-edit-store', function() {
 			action: {
 				type: 'EDIT_POST',
 				post: {
-					parent: 101
-				}
-			}
+					parent: 101,
+				},
+			},
 		} );
 
 		const post = PostEditStore.get();
@@ -121,17 +116,17 @@ describe( 'post-edit-store', function() {
 	it( 'does not decode post title entities on EDIT_POST', function() {
 		dispatcherCallback( {
 			action: {
-				type: 'DRAFT_NEW_POST'
-			}
+				type: 'DRAFT_NEW_POST',
+			},
 		} );
 
 		dispatcherCallback( {
 			action: {
 				type: 'EDIT_POST',
 				post: {
-					title: 'Ribs &gt; Chicken'
-				}
-			}
+					title: 'Ribs &gt; Chicken',
+				},
+			},
 		} );
 
 		assert( PostEditStore.get().title === 'Ribs &gt; Chicken' );
@@ -140,17 +135,17 @@ describe( 'post-edit-store', function() {
 	it( 'decodes post title entities on RECEIVE_POST_BEING_EDITED', function() {
 		dispatcherCallback( {
 			action: {
-				type: 'DRAFT_NEW_POST'
-			}
+				type: 'DRAFT_NEW_POST',
+			},
 		} );
 
 		dispatcherCallback( {
 			action: {
 				type: 'RECEIVE_POST_BEING_EDITED',
 				post: {
-					title: 'Ribs &gt; Chicken'
-				}
-			}
+					title: 'Ribs &gt; Chicken',
+				},
+			},
 		} );
 
 		assert( PostEditStore.get().title === 'Ribs > Chicken' );
@@ -160,8 +155,8 @@ describe( 'post-edit-store', function() {
 		dispatcherCallback( {
 			action: {
 				type: 'DRAFT_NEW_POST',
-				siteId: 1234
-			}
+				siteId: 1234,
+			},
 		} );
 
 		dispatcherCallback( {
@@ -169,15 +164,15 @@ describe( 'post-edit-store', function() {
 				type: 'EDIT_POST',
 				post: {
 					title: 'hello, world!',
-					content: 'initial edit'
-				}
-			}
+					content: 'initial edit',
+				},
+			},
 		} );
 
 		dispatcherCallback( {
 			action: {
-				type: 'STOP_EDITING_POST'
-			}
+				type: 'STOP_EDITING_POST',
+			},
 		} );
 
 		assert( PostEditStore.get() === null );
@@ -189,23 +184,21 @@ describe( 'post-edit-store', function() {
 			postEdits = {
 				title: 'hello, world!',
 				content: 'initial edit',
-				metadata: [
-					{ key: 'super', value: 'duper', operation: 'update' }
-				]
+				metadata: [ { key: 'super', value: 'duper', operation: 'update' } ],
 			};
 
 		dispatcherCallback( {
 			action: {
 				type: 'DRAFT_NEW_POST',
-				siteId: siteId
-			}
+				siteId: siteId,
+			},
 		} );
 
 		dispatcherCallback( {
 			action: {
 				type: 'EDIT_POST',
-				post: postEdits
-			}
+				post: postEdits,
+			},
 		} );
 
 		assert( PostEditStore.isNew() );
@@ -223,41 +216,41 @@ describe( 'post-edit-store', function() {
 			initialPost = {
 				ID: 2345,
 				title: 'hello, world!',
-				content: 'initial edit'
+				content: 'initial edit',
 			},
 			updates = {
-				content: 'updated content'
+				content: 'updated content',
 			};
 
 		dispatcherCallback( {
 			action: {
 				type: 'DRAFT_NEW_POST',
-				siteId: siteId
-			}
+				siteId: siteId,
+			},
 		} );
 		dispatcherCallback( {
 			action: {
 				type: 'EDIT_POST',
-				post: initialPost
-			}
+				post: initialPost,
+			},
 		} );
 		dispatcherCallback( {
 			action: {
-				type: 'EDIT_POST_SAVE'
-			}
+				type: 'EDIT_POST_SAVE',
+			},
 		} );
 
 		dispatcherCallback( {
 			action: {
 				type: 'EDIT_POST',
-				post: updates
-			}
+				post: updates,
+			},
 		} );
 		dispatcherCallback( {
 			action: {
 				type: 'RECEIVE_POST_BEING_EDITED',
-				post: initialPost
-			}
+				post: initialPost,
+			},
 		} );
 
 		assert( PostEditStore.get().content === updates.content );
@@ -270,26 +263,26 @@ describe( 'post-edit-store', function() {
 				metadata: [
 					{ key: 'super', value: 'duper', operation: 'update' },
 					{ key: 'foo', value: 'bar', operation: 'delete' },
-					{ key: 'bar', value: 'foo' }
-				]
+					{ key: 'bar', value: 'foo' },
+				],
 			},
 			expectedMetadata = [
 				{ key: 'super', value: 'duper', operation: 'update' },
-				{ key: 'foo', value: 'bar', operation: 'delete' }
+				{ key: 'foo', value: 'bar', operation: 'delete' },
 			];
 
 		dispatcherCallback( {
 			action: {
 				type: 'RECEIVE_POST_TO_EDIT',
-				post: {}
-			}
+				post: {},
+			},
 		} );
 
 		dispatcherCallback( {
 			action: {
 				type: 'EDIT_POST',
-				post: postEdits
-			}
+				post: postEdits,
+			},
 		} );
 
 		assert( PostEditStore.get().metadata === postEdits.metadata );
@@ -302,28 +295,28 @@ describe( 'post-edit-store', function() {
 		const siteId = 1234,
 			postEdits = {
 				title: 'hello, world!',
-				content: 'initial edit'
+				content: 'initial edit',
 			};
 
 		dispatcherCallback( {
 			action: {
 				type: 'DRAFT_NEW_POST',
-				siteId: siteId
-			}
+				siteId: siteId,
+			},
 		} );
 
 		dispatcherCallback( {
 			action: {
 				type: 'EDIT_POST',
-				post: postEdits
-			}
+				post: postEdits,
+			},
 		} );
 
 		dispatcherCallback( {
 			action: {
 				type: 'RECEIVE_POST_BEING_EDITED',
-				post: assign( { ID: 1234 }, postEdits )
-			}
+				post: assign( { ID: 1234 }, postEdits ),
+			},
 		} );
 
 		assert( PostEditStore.isNew() === false );
@@ -340,22 +333,22 @@ describe( 'post-edit-store', function() {
 		dispatcherCallback( {
 			action: {
 				type: 'RECEIVE_POST_TO_EDIT',
-				post: { content: 'bar' }
-			}
+				post: { content: 'bar' },
+			},
 		} );
 
 		dispatcherCallback( {
 			action: {
 				type: 'EDIT_POST_RAW_CONTENT',
-				content: 'foo'
-			}
+				content: 'foo',
+			},
 		} );
 
 		dispatcherCallback( {
 			action: {
 				type: 'RECEIVE_POST_BEING_EDITED',
-				post: { content: 'bar' }
-			}
+				post: { content: 'bar' },
+			},
 		} );
 
 		assert( ! PostEditStore.isDirty() );
@@ -365,35 +358,35 @@ describe( 'post-edit-store', function() {
 		dispatcherCallback( {
 			action: {
 				type: 'EDIT_POST_RAW_CONTENT',
-				content: 'foo'
-			}
+				content: 'foo',
+			},
 		} );
 
 		dispatcherCallback( {
 			action: {
 				type: 'EDIT_POST_RAW_CONTENT',
-				content: 'bar'
-			}
+				content: 'bar',
+			},
 		} );
 
 		dispatcherCallback( {
 			action: {
-				type: 'RESET_POST_RAW_CONTENT'
-			}
+				type: 'RESET_POST_RAW_CONTENT',
+			},
 		} );
 
 		assert( ! PostEditStore.isDirty() );
 	} );
 
 	describe( '#setRawContent', function() {
-		it( 'should not emit a change event if content hasn\'t changed', function() {
+		it( "should not emit a change event if content hasn't changed", function() {
 			const onChange = spy();
 
 			dispatcherCallback( {
 				action: {
 					type: 'RECEIVE_POST_TO_EDIT',
-					post: {}
-				}
+					post: {},
+				},
 			} );
 
 			PostEditStore.on( 'change', onChange );
@@ -401,15 +394,15 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST_RAW_CONTENT',
-					content: 'foo'
-				}
+					content: 'foo',
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST_RAW_CONTENT',
-					content: 'foo'
-				}
+					content: 'foo',
+				},
 			} );
 
 			PostEditStore.off( 'change', onChange );
@@ -424,8 +417,8 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			assert( PostEditStore.getChangedAttributes().status === 'draft' );
@@ -435,18 +428,20 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
-			assert( isEqual( PostEditStore.getChangedAttributes(), {
-				site_ID: 1,
-				status: 'draft',
-				type: 'post',
-				parent_id: null,
-				title: '',
-				content: ''
-			} ) );
+			assert(
+				isEqual( PostEditStore.getChangedAttributes(), {
+					site_ID: 1,
+					status: 'draft',
+					type: 'post',
+					parent_id: null,
+					title: '',
+					content: '',
+				} )
+			);
 		} );
 	} );
 
@@ -455,8 +450,8 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			assert( ! PostEditStore.isDirty() );
@@ -466,8 +461,8 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'RECEIVE_POST_TO_EDIT',
-					post: {}
-				}
+					post: {},
+				},
 			} );
 
 			assert( ! PostEditStore.isDirty() );
@@ -477,22 +472,22 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'RECEIVE_POST_TO_EDIT',
-					post: {}
-				}
+					post: {},
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST_RAW_CONTENT',
-					content: ''
-				}
+					content: '',
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST_RAW_CONTENT',
-					content: 'foo'
-				}
+					content: 'foo',
+				},
 			} );
 
 			assert( PostEditStore.isDirty() );
@@ -504,8 +499,8 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			assert( PostEditStore.isSaveBlocked() === false );
@@ -515,15 +510,15 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'BLOCK_EDIT_POST_SAVE',
-					key: 'foo'
-				}
+					key: 'foo',
+				},
 			} );
 
 			assert( PostEditStore.isSaveBlocked() === true );
@@ -533,15 +528,15 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'BLOCK_EDIT_POST_SAVE',
-					key: 'foo'
-				}
+					key: 'foo',
+				},
 			} );
 
 			assert( PostEditStore.isSaveBlocked( 'bar' ) === false );
@@ -551,15 +546,15 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'BLOCK_EDIT_POST_SAVE',
-					key: 'foo'
-				}
+					key: 'foo',
+				},
 			} );
 
 			assert( PostEditStore.isSaveBlocked( 'foo' ) === true );
@@ -571,8 +566,8 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			assert( PostEditStore.hasContent() === false );
@@ -582,16 +577,16 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST',
 					siteId: 1,
-					post: { title: 'Draft' }
-				}
+					post: { title: 'Draft' },
+				},
 			} );
 
 			assert( PostEditStore.hasContent() === true );
@@ -601,16 +596,16 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST',
 					siteId: 1,
-					post: { title: ' ' }
-				}
+					post: { title: ' ' },
+				},
 			} );
 
 			assert( PostEditStore.hasContent() === false );
@@ -620,16 +615,16 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST',
 					siteId: 1,
-					post: { excerpt: 'Excerpt' }
-				}
+					post: { excerpt: 'Excerpt' },
+				},
 			} );
 
 			assert( PostEditStore.hasContent() === true );
@@ -639,16 +634,16 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST',
 					siteId: 1,
-					post: { content: '<p><br data-mce-bogus="1"></p>' }
-				}
+					post: { content: '<p><br data-mce-bogus="1"></p>' },
+				},
 			} );
 
 			assert( PostEditStore.hasContent() === false );
@@ -658,16 +653,16 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST',
 					siteId: 1,
-					post: { content: '<p>&nbsp;</p>' }
-				}
+					post: { content: '<p>&nbsp;</p>' },
+				},
 			} );
 
 			assert( PostEditStore.hasContent() === false );
@@ -677,16 +672,16 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST',
 					siteId: 1,
-					post: { content: '<p> </p>' }
-				}
+					post: { content: '<p> </p>' },
+				},
 			} );
 
 			assert( PostEditStore.hasContent() === false );
@@ -696,16 +691,16 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST',
 					siteId: 1,
-					post: { content: '<p>Hello World</p>' }
-				}
+					post: { content: '<p>Hello World</p>' },
+				},
 			} );
 
 			assert( PostEditStore.hasContent() === true );
@@ -715,15 +710,15 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST_RAW_CONTENT',
-					content: '<p>Hello World</p>'
-				}
+					content: '<p>Hello World</p>',
+				},
 			} );
 
 			assert( PostEditStore.hasContent() === true );
@@ -733,23 +728,23 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST',
 					siteId: 1,
-					post: { content: '<p>Hello World</p>' }
-				}
+					post: { content: '<p>Hello World</p>' },
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST_RAW_CONTENT',
-					content: '<p></p>'
-				}
+					content: '<p></p>',
+				},
 			} );
 
 			assert( PostEditStore.hasContent() === false );
@@ -761,28 +756,28 @@ describe( 'post-edit-store', function() {
 			PostEditStore.removeAllListeners();
 		} );
 
-		it( 'should not trigger changes if isDirty() and hadContent() don\'t change', function() {
+		it( "should not trigger changes if isDirty() and hadContent() don't change", function() {
 			let called = false;
 
 			dispatcherCallback( {
 				action: {
 					type: 'DRAFT_NEW_POST',
-					siteId: 1
-				}
+					siteId: 1,
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST_RAW_CONTENT',
-					content: '<p>H</p>'
-				}
+					content: '<p>H</p>',
+				},
 			} );
 
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST_RAW_CONTENT',
-					content: '<p>Hello</p>'
-				}
+					content: '<p>Hello</p>',
+				},
 			} );
 
 			function callback() {
@@ -794,8 +789,8 @@ describe( 'post-edit-store', function() {
 			dispatcherCallback( {
 				action: {
 					type: 'EDIT_POST_RAW_CONTENT',
-					content: '<p>Hello World!</p>'
-				}
+					content: '<p>Hello World!</p>',
+				},
 			} );
 
 			assert( called === false );

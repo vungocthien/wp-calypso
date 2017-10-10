@@ -1,28 +1,22 @@
+/** @format */
 /**
  * External dependencies
  */
-
 import { assert } from 'chai';
 import { spy } from 'sinon';
 
 /**
  * Internal dependencies
  */
-import useMockery from 'test/helpers/use-mockery';
-import mockedWporg from './mocks/wporg';
+import WPorgActions from 'lib/plugins/wporg-data/actions';
+import mockedWporg from 'lib/wporg';
+jest.mock( 'lib/wporg', () => require( './mocks/wporg' ) );
+jest.mock( 'lib/impure-lodash', () => ( {
+	debounce: cb => cb,
+} ) );
 
 describe( 'WPorg Data Actions', () => {
-	let WPorgActions;
-
-	useMockery( mockery => {
-		mockery.registerMock( 'lib/wporg', mockedWporg );
-		mockery.registerMock( 'lib/impure-lodash', {
-			debounce: cb => cb,
-		} );
-	} );
-
 	beforeEach( () => {
-		WPorgActions = require( 'lib/plugins/wporg-data/actions' );
 		WPorgActions.reset();
 		mockedWporg.reset();
 	} );
@@ -43,7 +37,7 @@ describe( 'WPorg Data Actions', () => {
 		assert.isFunction( WPorgActions.fetchNextCategoryPage );
 	} );
 
-	it( 'when fetching a plugin list, it shouldn\'t do the wporg request if there\'s a previous one still not finished for the same category', () => {
+	it( "when fetching a plugin list, it shouldn't do the wporg request if there's a previous one still not finished for the same category", () => {
 		mockedWporg.deactivatedCallbacks = true;
 		WPorgActions.fetchPluginsList( 'new', 1 );
 		WPorgActions.fetchPluginsList( 'new', 1 );

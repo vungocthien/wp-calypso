@@ -1,3 +1,5 @@
+/** @format */
+
 /**
  * External dependencies
  */
@@ -7,10 +9,7 @@ import { expect } from 'chai';
  * Internal dependencies
  */
 import reducer from '../reducer';
-
-import {
-	WOOCOMMERCE_COUPONS_PAGE_UPDATED,
-} from 'woocommerce/state/action-types';
+import { WOOCOMMERCE_COUPONS_UPDATED } from 'woocommerce/state/action-types';
 
 describe( 'reducer', () => {
 	const siteId = 123;
@@ -38,10 +37,10 @@ describe( 'reducer', () => {
 
 	it( 'should save page data to store', () => {
 		const action = {
-			type: WOOCOMMERCE_COUPONS_PAGE_UPDATED,
+			type: WOOCOMMERCE_COUPONS_UPDATED,
 			siteId,
 			coupons: couponsPage1,
-			pageIndex: 1,
+			params: { page: 1, per_page: 10 },
 			totalPages: 1,
 			totalCoupons: 3,
 		};
@@ -50,14 +49,15 @@ describe( 'reducer', () => {
 
 		expect( newState ).to.exist;
 		expect( newState.coupons ).to.equal( couponsPage1 );
-		expect( newState.pageIndex ).to.equal( 1 );
+		expect( newState.params.page ).to.equal( 1 );
+		expect( newState.params.per_page ).to.equal( 10 );
 		expect( newState.totalPages ).to.equal( 1 );
 		expect( newState.totalCoupons ).to.equal( 3 );
 	} );
 
 	it( 'should clear page data from store', () => {
 		const action = {
-			type: WOOCOMMERCE_COUPONS_PAGE_UPDATED,
+			type: WOOCOMMERCE_COUPONS_UPDATED,
 			siteId,
 		};
 

@@ -1,35 +1,39 @@
 /**
+ * @format
+ * @jest-environment jsdom
+ */
+
+/**
  * External dependencies
  */
 import { expect } from 'chai';
-import { noop } from 'lodash';
 import sinon from 'sinon';
 
 /**
  * Internal dependencies
  */
-import useMockery from 'test/helpers/use-mockery';
-import useFakeDom from 'test/helpers/use-fake-dom';
+import UserUtils from '../utils';
+import configMock from 'config';
+
+jest.mock( 'config', () => {
+	const { stub } = require( 'sinon' );
+
+	const configMock = stub();
+	configMock.isEnabled = stub();
+
+	return configMock;
+} );
+jest.mock( 'lib/wp', () => ( {
+	me: () => ( {
+		get: () => {},
+	} ),
+} ) );
 
 describe( 'UserUtils', () => {
-	let UserUtils, user, configMock;
-
-	useFakeDom();
-
-	useMockery( mockery => {
-		configMock = sinon.stub();
-		configMock.isEnabled = sinon.stub();
-		mockery.registerMock( 'config', configMock );
-		mockery.registerMock( 'lib/wp', {
-			me: () => ( {
-				get: noop
-			} )
-		} );
-	} );
+	let user;
 
 	before( () => {
 		user = require( 'lib/user' )();
-		UserUtils = require( '../utils' );
 	} );
 
 	beforeEach( () => {
@@ -38,9 +42,7 @@ describe( 'UserUtils', () => {
 
 	context( 'without logout url', () => {
 		before( () => {
-			configMock.isEnabled
-				.withArgs( 'always_use_logout_url' )
-				.returns( false );
+			configMock.isEnabled.withArgs( 'always_use_logout_url' ).returns( false );
 		} );
 
 		it( 'uses userData.logout_URL when available', () => {
@@ -52,9 +54,7 @@ describe( 'UserUtils', () => {
 
 	context( 'with logout url', () => {
 		before( () => {
-			configMock.isEnabled
-				.withArgs( 'always_use_logout_url' )
-				.returns( true );
+			configMock.isEnabled.withArgs( 'always_use_logout_url' ).returns( true );
 		} );
 
 		it( 'works when |subdomain| is not present', () => {

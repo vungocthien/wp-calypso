@@ -1,10 +1,12 @@
 /**
  * External dependencies
+ *
+ * @format
  */
+
 import React from 'react';
-import {
-	some,
-} from 'lodash';
+import { localize } from 'i18n-calypso';
+import { some } from 'lodash';
 
 /**
  * Internal dependencies
@@ -29,56 +31,53 @@ var CreditsPaymentBox = React.createClass( {
 			hasBusinessPlanInCart;
 
 		return (
-			<form onSubmit={ this.props.onSubmit }>
+            <form onSubmit={ this.props.onSubmit }>
 				<div className="payment-box-section">
-					<h6>{ this.translate( 'WordPress.com Credits' ) }</h6>
+					<h6>{ this.props.translate( 'WordPress.com Credits' ) }</h6>
 
 					<span>
-						{ this.translate( 'You have {{strong}}%(credits)s %(currency)s in Credits{{/strong}} available.',
+						{ this.props.translate(
+							'You have {{strong}}%(credits)s %(currency)s in Credits{{/strong}} available.',
 							{
 								args: {
 									credits: cart.credits,
-									currency: cart.currency
+									currency: cart.currency,
 								},
 								components: {
-									strong: <strong />
-								}
-							} )
-						}
+									strong: <strong />,
+								},
+							}
+						) }
 					</span>
 				</div>
 
 				<TermsOfService />
 
 				<div className="payment-box-actions">
-					<PayButton
-						cart={ this.props.cart }
-						transactionStep={ transactionStep } />
-					{
-						showPaymentChatButton &&
+					<PayButton cart={ this.props.cart } transactionStep={ transactionStep } />
+					{ showPaymentChatButton && (
 						<PaymentChatButton
 							paymentType="credits"
 							cart={ cart }
-							transactionStep={ transactionStep } />
-					}
+							transactionStep={ transactionStep }
+						/>
+					) }
 				</div>
 
 				<CartCoupon cart={ cart } />
 
 				<CartToggle />
 			</form>
-		);
+        );
 	},
 
 	render: function() {
 		return (
-			<PaymentBox
-				classSet="credits-payment-box"
-				title={ this.translate( 'Secure Payment' ) }>
+            <PaymentBox classSet="credits-payment-box" title={ this.props.translate( 'Secure Payment' ) }>
 				{ this.content() }
 			</PaymentBox>
-		);
-	}
+        );
+	},
 } );
 
-module.exports = CreditsPaymentBox;
+module.exports = localize(CreditsPaymentBox);
