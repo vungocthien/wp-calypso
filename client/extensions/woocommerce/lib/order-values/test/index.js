@@ -145,7 +145,7 @@ describe( 'getOrderTotalTax', () => {
 	} );
 
 	it( 'should get the correct tax amount', () => {
-		expect( getOrderTotalTax( orderWithTax ) ).to.eql( 7.1738 );
+		expect( getOrderTotalTax( orderWithTax ) ).to.eql( 7.3 );
 	} );
 
 	it( 'should return 0 if there is no tax', () => {
@@ -153,7 +153,7 @@ describe( 'getOrderTotalTax', () => {
 	} );
 
 	it( 'should get the correct tax amount with multiple coupons', () => {
-		expect( getOrderTotalTax( orderWithCoupons ) ).to.eql( 4.4243 );
+		expect( getOrderTotalTax( orderWithCoupons ) ).to.eql( 5.3618 );
 	} );
 } );
 
