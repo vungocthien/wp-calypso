@@ -5,7 +5,7 @@
  */
 
 import { connect } from 'react-redux';
-import { flatten, find, isEmpty, isEqual, reduce, startsWith } from 'lodash';
+import { flatten, find, findIndex, isEmpty, isEqual, reduce, startsWith } from 'lodash';
 import i18n, { localize } from 'i18n-calypso';
 import page from 'page';
 import PropTypes from 'prop-types';
@@ -19,6 +19,7 @@ import { cartItems } from 'lib/cart-values';
 import { clearSitePlans } from 'state/sites/plans/actions';
 import { clearPurchases } from 'state/purchases/actions';
 import DomainDetailsForm from './domain-details-form';
+import TransferDomainPrecheck from './transfer-domain-precheck';
 import { domainMapping } from 'lib/cart-values/cart-items';
 import { fetchReceiptCompleted } from 'state/receipts/actions';
 import { getExitCheckoutUrl } from 'lib/checkout';
@@ -61,7 +62,10 @@ const Checkout = React.createClass( {
 	},
 
 	getInitialState: function() {
-		return { previousCart: null };
+		return {
+			previousCart: null,
+			domainTransfers: {},
+		};
 	},
 
 	componentWillMount: function() {
@@ -374,8 +378,46 @@ const Checkout = React.createClass( {
 		page( redirectPath );
 	},
 
+	hasTransferProduct() {
+		return cartItems.hasTransferProduct( this.props.cart );
+	},
+
+	setValidTransfer( domain ) {
+		const domainTransfers = {};
+		domainTransfers[ domain ] = true;
+
+		this.setState(
+			{
+				domainTransfers: Object.assign(
+					{},
+					this.state.domainTransfers,
+					domainTransfers
+				),
+			}
+		);
+	},
+
 	content: function() {
-		const { selectedSite } = this.props;
+		const { cart, selectedSite } = this.props;
+		const { domainTransfers } = this.state;
+
+		if ( ! this.isLoading() && this.hasTransferProduct() ) {
+			const domainTransfersCart = cartItems.getDomainTransfers( cart );
+			const index = findIndex( domainTransfersCart, ( product ) => {
+				return ! domainTransfers[ product.meta ];
+			} );
+
+			if ( index !== -1 ) {
+				return (
+					<TransferDomainPrecheck
+						total={ domainTransfersCart.length }
+						current={ index }
+						domain={ domainTransfersCart[ index ].meta }
+						setValid={ this.setValidTransfer }
+					/>
+				);
+			}
+		}
 
 		if ( ! this.isLoading() && this.needsDomainDetails() ) {
 			return (
