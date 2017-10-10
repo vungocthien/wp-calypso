@@ -23,16 +23,6 @@ import { stripHTML, decodeEntities } from 'lib/formatting';
 import { urlToDomainAndPath } from 'lib/url';
 import { convertDateToUserLocation } from 'components/post-schedule/utils';
 import { gmtOffset, timezone } from 'lib/site/utils';
-import humanDate from 'lib/human-date';
-
-const getFormattedDate = ( commentDate, site ) =>
-	humanDate(
-		convertDateToUserLocation(
-			commentDate || new Date(),
-			timezone( site ),
-			gmtOffset( site )
-		).format( 'll LT' )
-	);
 
 export const CommentDetailHeader = ( {
 	authorAvatarUrl,
@@ -50,6 +40,7 @@ export const CommentDetailHeader = ( {
 	isExpanded,
 	postTitle,
 	site,
+	moment,
 	toggleApprove,
 	toggleEditMode,
 	toggleExpanded,
@@ -131,7 +122,11 @@ export const CommentDetailHeader = ( {
 								</Emojify>
 							</div>
 							<div className="comment-detail__author-info-timestamp">
-								{ getFormattedDate( commentDate, site ) }
+								{ convertDateToUserLocation(
+									commentDate || moment(),
+									timezone( site ),
+									gmtOffset( site )
+								).fromNow() }
 							</div>
 						</div>
 					</div>
