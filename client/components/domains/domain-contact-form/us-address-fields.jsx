@@ -4,7 +4,7 @@
  *
  * @format
  */
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import identity from 'lodash/identity';
 import noop from 'lodash/noop';
@@ -14,7 +14,7 @@ import noop from 'lodash/noop';
  */
 import { StateSelect, Input, HiddenInput } from 'my-sites/domains/components/form';
 
-export class UsAddressFields extends PureComponent {
+export class UsAddressFields extends Component {
 	static propTypes = {
 		countryCode: PropTypes.string,
 		getFieldProps: PropTypes.func,

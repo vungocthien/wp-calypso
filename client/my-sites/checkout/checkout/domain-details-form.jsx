@@ -181,6 +181,8 @@ export class DomainDetailsForm extends PureComponent {
 
 	setFormState = form => {
 		// eslint-disable-next-line
+		console.log( form );
+		// eslint-disable-next-line
 		if ( ! this.needsFax() ) {
 			delete form.fax;
 		}
@@ -200,6 +202,8 @@ export class DomainDetailsForm extends PureComponent {
 	};
 
 	handleChangeEvent = event => {
+		// eslint-disable-next-line
+		console.log( event.target );
 		// Resets the state field every time the user selects a different country
 		if ( event.target.name === 'country-code' ) {
 			this.formStateController.handleFieldChange( {
@@ -252,24 +256,25 @@ export class DomainDetailsForm extends PureComponent {
 		return cartItems.getDomainRegistrations( this.props.cart ).length;
 	}
 
-	getFieldProps( name, needsChildRef ) {
+	getFieldProps = ( name, needsChildRef ) => {
 		const ref = needsChildRef ? { inputRef: this.getInputRefCallback( name ) } : { ref: name };
+		const { form } = this.state;
 		return {
 			name,
 			...ref,
 			additionalClasses: 'checkout-field',
-			value: formState.getFieldValue( this.state.form, name ) || '',
-			isError: formState.isFieldInvalid( this.state.form, name ),
-			disabled: formState.isFieldDisabled( this.state.form, name ),
+			value: formState.getFieldValue( form, name ) || '',
+			isError: formState.isFieldInvalid( form, name ),
+			disabled: formState.isFieldDisabled( form, name ),
 			onChange: this.handleChangeEvent,
 			// The keys are mapped to snake_case when going to API and camelCase when the response is parsed and we are using
 			// kebab-case for HTML, so instead of using different variations all over the place, this accepts kebab-case and
 			// converts it to camelCase which is the format stored in the formState.
-			errorMessage: ( formState.getFieldErrorMessages( this.state.form, camelCase( name ) ) || [] )
+			errorMessage: ( formState.getFieldErrorMessages( form, camelCase( name ) ) || [] )
 				.join( '\n' ),
 			eventFormName: 'Checkout Form',
 		};
-	}
+	};
 
 	needsFax() {
 		return (
@@ -464,17 +469,20 @@ export class DomainDetailsForm extends PureComponent {
 				{ ! needsOnlyGoogleAppsDetails && this.needsFax() && this.renderFaxField() }
 				{ /*{ this.shouldDisplayAddressFieldset() &&*/ }
 				{ /*this.renderCountryDependentAddressFields( needsOnlyGoogleAppsDetails ) }*/ }
-				{ /*
-					<UsAddressFields getFieldProps={ this.getFieldProps.bind( this ) } translate={ translate } countryCode={ countryCode } />
-*/ }
-				<UsAddressFieldsRender
-					renderMethodArray={ [
-						this.renderAddressFields,
-						this.renderCityField,
-						this.renderStateField,
-						this.renderPostalCodeField,
-					] }
+				<UsAddressFields
+					getFieldProps={ this.getFieldProps }
+					translate={ translate }
+					countryCode={ countryCode }
 				/>
+
+				{ /*<UsAddressFieldsRender*/ }
+				{ /*renderMethodArray={ [*/ }
+				{ /*this.renderAddressFields,*/ }
+				{ /*this.renderCityField,*/ }
+				{ /*this.renderStateField,*/ }
+				{ /*this.renderPostalCodeField,*/ }
+				{ /*] }*/ }
+				{ /*/>*/ }
 				{ this.renderCountryField() }
 				{ this.renderSubmitButton() }
 			</form>
