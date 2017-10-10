@@ -27,6 +27,11 @@ import {
 	HAPPYCHAT_CHAT_STATUS_DEFAULT,
 	HAPPYCHAT_CHAT_STATUS_PENDING,
 } from '../selectors';
+import {
+	HAPPYCHAT_CONNECTION_STATUS_UNINITIALIZED,
+	HAPPYCHAT_CONNECTION_STATUS_CONNECTED,
+	HAPPYCHAT_CONNECTION_STATUS_CONNECTING,
+} from 'state/happychat/constants';
 import wpcom from 'lib/wp';
 import {
 	ANALYTICS_EVENT_RECORD,
@@ -45,7 +50,7 @@ describe( 'middleware', () => {
 		let dispatch, getState;
 		const uninitializedState = deepFreeze( {
 			currentUser: { id: 1, capabilities: {} },
-			happychat: { connection: { status: 'uninitialized' } },
+			happychat: { connection: { status: HAPPYCHAT_CONNECTION_STATUS_UNINITIALIZED } },
 			users: { items: { 1: {} } },
 			help: { selectedSiteId: 2647731 },
 			sites: {
@@ -73,8 +78,12 @@ describe( 'middleware', () => {
 		} );
 
 		test( 'should not attempt to connect when Happychat has been initialized', () => {
-			const connectedState = { happychat: { connection: { status: 'connected' } } };
-			const connectingState = { happychat: { connection: { status: 'connecting' } } };
+			const connectedState = {
+				happychat: { connection: { status: HAPPYCHAT_CONNECTION_STATUS_CONNECTED } },
+			};
+			const connectingState = {
+				happychat: { connection: { status: HAPPYCHAT_CONNECTION_STATUS_CONNECTING } },
+			};
 
 			return Promise.all( [
 				connectChat( connection, { dispatch, getState: getState.returns( connectedState ) } ),
@@ -169,7 +178,7 @@ describe( 'middleware', () => {
 		const recentlyActiveState = deepFreeze( {
 			currentUser: { id: 1, capabilities: {} },
 			happychat: {
-				connection: { status: 'uninitialized' },
+				connection: { status: HAPPYCHAT_CONNECTION_STATUS_UNINITIALIZED },
 				lastActivityTimestamp: Date.now(),
 			},
 			users: { items: { 1: {} } },
@@ -196,7 +205,7 @@ describe( 'middleware', () => {
 		const notRecentlyActiveState = deepFreeze( {
 			currentUser: { id: 1, capabilities: {} },
 			happychat: {
-				connection: { status: 'uninitialized' },
+				connection: { status: HAPPYCHAT_CONNECTION_STATUS_UNINITIALIZED },
 				lastActivityTimestamp: null, // no record of last activity
 			},
 			users: { items: { 1: {} } },
@@ -300,7 +309,7 @@ describe( 'middleware', () => {
 		test( 'should send the locale and groups through the connection and send a preferences signal', () => {
 			const state = {
 				happychat: {
-					connection: { status: 'connected' },
+					connection: { status: HAPPYCHAT_CONNECTION_STATUS_CONNECTED },
 				},
 				currentUser: {
 					locale: 'en',
@@ -360,7 +369,7 @@ describe( 'middleware', () => {
 			},
 			happychat: {
 				connection: {
-					status: 'connected',
+					status: HAPPYCHAT_CONNECTION_STATUS_CONNECTED,
 					isAvailable: true,
 				},
 				chatStatus: HAPPYCHAT_CHAT_STATUS_ASSIGNED,
@@ -381,7 +390,9 @@ describe( 'middleware', () => {
 
 		test( 'should not sent the page URL the user is in when client not connected', () => {
 			const getState = () =>
-				Object.assign( {}, state, { happychat: { connection: { status: 'uninitialized' } } } );
+				Object.assign( {}, state, {
+					happychat: { connection: { status: HAPPYCHAT_CONNECTION_STATUS_UNINITIALIZED } },
+				} );
 			sendRouteSetEventMessage( connection, { getState }, action );
 			expect( connection.sendEvent ).to.not.have.been.called;
 		} );
@@ -458,19 +469,19 @@ describe( 'middleware', () => {
 	describe( '#sendActionLogsAndEvents', () => {
 		const assignedState = deepFreeze( {
 			happychat: {
-				connection: { status: 'connected' },
+				connection: { status: HAPPYCHAT_CONNECTION_STATUS_CONNECTED },
 				chatStatus: HAPPYCHAT_CHAT_STATUS_ASSIGNED,
 			},
 		} );
 		const unassignedState = deepFreeze( {
 			happychat: {
-				connection: { status: 'connected' },
+				connection: { status: HAPPYCHAT_CONNECTION_STATUS_CONNECTED },
 				chatStatus: HAPPYCHAT_CHAT_STATUS_DEFAULT,
 			},
 		} );
 		const unconnectedState = deepFreeze( {
 			happychat: {
-				connection: { status: 'uninitialized' },
+				connection: { status: HAPPYCHAT_CONNECTION_STATUS_UNINITIALIZED },
 				chatStatus: HAPPYCHAT_CHAT_STATUS_DEFAULT,
 			},
 		} );
