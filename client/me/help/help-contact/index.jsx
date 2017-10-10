@@ -139,7 +139,7 @@ const HelpContact = React.createClass( {
 		const { howCanWeHelp, howYouFeel, message, site } = contactForm;
 
 		this.props.sendUserInfo( howCanWeHelp, howYouFeel, site );
-		this.props.sendHappychatMessage( message, { isFirst: true } );
+		this.props.sendHappychatMessage( message, { includeInSummary: true } );
 
 		analytics.tracks.recordEvent( 'calypso_help_live_chat_begin', {
 			site_plan_product_id: ( site ? site.plan.product_id : null ),
