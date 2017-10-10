@@ -32,7 +32,7 @@ import {
 import { getContactDetailsCache } from 'state/selectors';
 import { updateContactDetailsCache } from 'state/domains/management/actions';
 import QueryContactDetailsCache from 'components/data/query-contact-details-cache';
-import { CountrySelect, StateSelect, Input, HiddenInput } from 'my-sites/domains/components/form';
+import { CountrySelect, Input, HiddenInput } from 'my-sites/domains/components/form';
 import PrivacyProtection from './privacy-protection';
 import PaymentBox from './payment-box';
 import { cartItems } from 'lib/cart-values';
@@ -55,7 +55,8 @@ import ExtraInfoForm, {
 	tldsWithAdditionalDetailsForms,
 } from 'components/domains/registrant-extra-info';
 import config from 'config';
-import { CHECKOUT_US_ADDRESS_FORMAT_COUNTRIES } from 'my-sites/checkout/constants';
+import GAppsFields from 'my-sites/domains/components/domain-form-fieldsets/g-apps-fieldset';
+import RegionAddressFieldsets from 'my-sites/domains/components/domain-form-fieldsets/region-address-fieldsets';
 
 const debug = debugFactory( 'calypso:my-sites:upgrades:checkout:domain-details' );
 const wpcom = wp.undocumented(),
@@ -248,24 +249,26 @@ export class DomainDetailsForm extends PureComponent {
 		return cartItems.getDomainRegistrations( this.props.cart ).length;
 	}
 
-	getFieldProps( name ) {
-		const ref = name === 'state' ? { inputRef: this.getInputRefCallback( name ) } : { ref: name };
+	getFieldProps = ( name, needsChildRef ) => {
+		// if we're referencing a DOM object in a child component we need to add the `inputRef` prop
+		const ref = needsChildRef ? { inputRef: this.getInputRefCallback( name ) } : { ref: name },
+			{ form } = this.state;
 		return {
 			name,
 			...ref,
 			additionalClasses: 'checkout-field',
-			value: formState.getFieldValue( this.state.form, name ) || '',
-			isError: formState.isFieldInvalid( this.state.form, name ),
-			disabled: formState.isFieldDisabled( this.state.form, name ),
+			value: formState.getFieldValue( form, name ) || '',
+			isError: formState.isFieldInvalid( form, name ),
+			disabled: formState.isFieldDisabled( form, name ),
 			onChange: this.handleChangeEvent,
 			// The keys are mapped to snake_case when going to API and camelCase when the response is parsed and we are using
 			// kebab-case for HTML, so instead of using different variations all over the place, this accepts kebab-case and
 			// converts it to camelCase which is the format stored in the formState.
-			errorMessage: ( formState.getFieldErrorMessages( this.state.form, camelCase( name ) ) || [] )
+			errorMessage: ( formState.getFieldErrorMessages( form, camelCase( name ) ) || [] )
 				.join( '\n' ),
 			eventFormName: 'Checkout Form',
 		};
-	}
+	};
 
 	needsFax() {
 		return (
@@ -279,11 +282,6 @@ export class DomainDetailsForm extends PureComponent {
 
 	allDomainRegistrationsHavePrivacy() {
 		return cartItems.getDomainRegistrationsWithoutPrivacy( this.props.cart ).length === 0;
-	}
-
-	shouldDisplayAddressFieldset() {
-		const { contactDetails } = this.props;
-		return !! ( contactDetails || {} ).countryCode;
 	}
 
 	renderSubmitButton() {
@@ -364,7 +362,9 @@ export class DomainDetailsForm extends PureComponent {
 	}
 
 	renderFaxField() {
-		return <Input label={ this.props.translate( 'Fax' ) } { ...this.getFieldProps( 'fax' ) } />;
+		return this.needsFax() ? (
+			<Input label={ this.props.translate( 'Fax' ) } { ...this.getFieldProps( 'fax' ) } />
+		) : null;
 	}
 
 	renderPhoneField() {
@@ -381,77 +381,40 @@ export class DomainDetailsForm extends PureComponent {
 		);
 	}
 
-	renderAddressFields() {
+	renderContactDetailsFields() {
+		const { translate, contactDetails } = this.props,
+			countryCode = ( contactDetails || {} ).countryCode;
 		return (
 			<div>
-				<Input
-					label={ this.props.translate( 'Address' ) }
-					maxLength={ 40 }
-					{ ...this.getFieldProps( 'address-1' ) }
+				{ this.renderOrganizationField() }
+				{ this.renderEmailField() }
+				{ this.renderPhoneField() }
+				{ this.renderFaxField() }
+				<RegionAddressFieldsets
+					getFieldProps={ this.getFieldProps }
+					translate={ translate }
+					countryCode={ countryCode }
 				/>
-
-				<HiddenInput
-					label={ this.props.translate( 'Address Line 2' ) }
-					text={ this.props.translate( '+ Add Address Line 2' ) }
-					maxLength={ 40 }
-					{ ...this.getFieldProps( 'address-2' ) }
-				/>
+				{ this.renderCountryField() }
 			</div>
 		);
 	}
 
-	renderCityField() {
-		return <Input label={ this.props.translate( 'City' ) } { ...this.getFieldProps( 'city' ) } />;
-	}
-
-	renderStateField() {
-		const countryCode = formState.getFieldValue( this.state.form, 'countryCode' );
-
-		return (
-			<StateSelect
-				label={ this.props.translate( 'State' ) }
-				countryCode={ countryCode }
-				{ ...this.getFieldProps( 'state' ) }
-			/>
-		);
-	}
-
-	renderPostalCodeField() {
-		return (
-			<Input
-				label={ this.props.translate( 'Postal Code' ) }
-				{ ...this.getFieldProps( 'postal-code' ) }
-			/>
-		);
-	}
-
-	renderCountryDependentAddressFields( needsOnlyGoogleAppsDetails ) {
-		const { isStateRequiredInAddress } = this.props;
-		return (
-			<div className="checkout__domain-details-country-dependent-address-fields">
-				{ ! needsOnlyGoogleAppsDetails && this.renderAddressFields() }
-				{ ! needsOnlyGoogleAppsDetails && this.renderCityField() }
-				{ isStateRequiredInAddress && ! needsOnlyGoogleAppsDetails && this.renderStateField() }
-				{ this.renderPostalCodeField() }
-			</div>
-		);
-	}
-
-	renderDetailsForm( needsOnlyGoogleAppsDetails ) {
+	renderDetailsForm = () => {
+		const { translate } = this.props;
 		return (
 			<form>
 				{ this.renderNameFields() }
-				{ ! needsOnlyGoogleAppsDetails && this.renderOrganizationField() }
-				{ ! needsOnlyGoogleAppsDetails && this.renderEmailField() }
-				{ ! needsOnlyGoogleAppsDetails && this.renderPhoneField() }
-				{ this.renderCountryField() }
-				{ ! needsOnlyGoogleAppsDetails && this.needsFax() && this.renderFaxField() }
-				{ this.shouldDisplayAddressFieldset() &&
-					this.renderCountryDependentAddressFields( needsOnlyGoogleAppsDetails ) }
+
+				{ this.needsOnlyGoogleAppsDetails() ? (
+					<GAppsFields getFieldProps={ this.getFieldProps } translate={ translate } />
+				) : (
+					this.renderContactDetailsFields()
+				) }
 				{ this.renderSubmitButton() }
 			</form>
 		);
-	}
+	};
 
 	renderExtraDetailsForm( tld ) {
 		return <ExtraInfoForm tld={ tld }>{ this.renderSubmitButton() }</ExtraInfoForm>;
@@ -528,28 +491,24 @@ export class DomainDetailsForm extends PureComponent {
 		return this.inputRefCallbacks[ name ];
 	}
 
-	renderCurrentForm( needsOnlyGoogleAppsDetails ) {
+	renderCurrentForm() {
 		const { currentStep } = this.state;
 		return includes( tldsWithAdditionalDetailsForms, currentStep )
 			? this.renderExtraDetailsForm( this.state.currentStep )
-			: this.renderDetailsForm( needsOnlyGoogleAppsDetails );
+			: this.renderDetailsForm();
 	}
 
 	render() {
-		const { isStateRequiredInAddress } = this.props,
-			needsOnlyGoogleAppsDetails = this.needsOnlyGoogleAppsDetails(),
-			classSet = classNames( {
-				'domain-details': true,
-				selected: true,
-				'only-google-apps-details': needsOnlyGoogleAppsDetails,
-				'eu-address': ! isStateRequiredInAddress,
-			} );
+		const classSet = classNames( {
+			'domain-details': true,
+			selected: true,
+		} );
 
 		let title;
 		// TODO: gather up tld specific stuff
 		if ( this.state.currentStep === 'fr' ) {
 			title = this.props.translate( '.FR Registration' );
-		} else if ( needsOnlyGoogleAppsDetails ) {
+		} else if ( this.needsOnlyGoogleAppsDetails() ) {
 			title = this.props.translate( 'G Suite Account Information' );
 		} else {
 			title = this.props.translate( 'Domain Contact Information' );
@@ -561,7 +520,7 @@ export class DomainDetailsForm extends PureComponent {
 					this.allDomainRegistrationsSupportPrivacy() &&
 					this.renderPrivacySection() }
 				<PaymentBox currentPage={ this.state.currentStep } classSet={ classSet } title={ title }>
-					{ this.renderCurrentForm( needsOnlyGoogleAppsDetails ) }
+					{ this.renderCurrentForm() }
 				</PaymentBox>
 			</div>
 		);
@@ -583,17 +542,10 @@ export class DomainDetailsFormContainer extends PureComponent {
 	}
 }
 
-export default connect( state => ( { contactDetails: getContactDetailsCache( state ) } ), {
-	updateContactDetailsCache,
-} )( localize( DomainDetailsFormContainer ) );
 export default connect(
-	( state ) => {
-		const contactDetails = getContactDetailsCache( state );
-		// this can one day be a selector in state/selectors if we need it elsewhere
-		const isStateRequiredInAddress = includes( CHECKOUT_US_ADDRESS_FORMAT_COUNTRIES, ( contactDetails || {} ).countryCode );
+	state => {
 		return {
-			contactDetails,
-			isStateRequiredInAddress
+			contactDetails: getContactDetailsCache( state ),
 		};
 	},
 	{ updateContactDetailsCache }

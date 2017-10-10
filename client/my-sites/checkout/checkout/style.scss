@@ -588,13 +588,13 @@
 				}
 			}
 
-			&.only-google-apps-details {
+			.g-apps-fields {
 				.country {
 					width: 66%;
 				}
 			}
 
-			&.eu-address {
+			.eu-address-fields {
 				.postal-code {
 					 float: left;
 					 width: calc( 33% - 7px );
