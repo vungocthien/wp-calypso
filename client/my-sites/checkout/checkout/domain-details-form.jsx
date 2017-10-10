@@ -57,9 +57,7 @@ import ExtraInfoForm, {
 	tldsWithAdditionalDetailsForms,
 } from 'components/domains/registrant-extra-info';
 import config from 'config';
-import { CHECKOUT_EU_ADDRESS_FORMAT_COUNTRY_CODES } from 'my-sites/checkout/constants';
-import UsAddressFields from 'components/domains/domain-contact-form/us-address-fields';
-import UsAddressFieldsRender from 'components/domains/domain-contact-form/us-address-fields-render';
+import RenderDomainFieldset from 'my-sites/domains/components/domain-form-fieldsets/region-domain-fieldset';
 const debug = debugFactory( 'calypso:my-sites:upgrades:checkout:domain-details' );
 const wpcom = wp.undocumented(),
 	countriesList = countriesListForDomainRegistrations();
@@ -96,6 +94,7 @@ export class DomainDetailsForm extends PureComponent {
 
 		this.inputRefs = {};
 		this.inputRefCallbacks = {};
+		this.fieldRenderMethods = {};
 	}
 
 	componentWillMount() {
@@ -107,6 +106,18 @@ export class DomainDetailsForm extends PureComponent {
 			onNewState: this.setFormState,
 			onError: this.handleFormControllerError,
 		} );
+
+		this.fieldRenderMethods = {
+			name: this.renderNameFields,
+			organization: this.renderOrganizationField,
+			email: this.renderEmailField,
+			phone: this.renderPhoneField,
+			fax: this.renderFaxField,
+			address: this.renderAddressFields,
+			city: this.renderCityField,
+			state: this.renderStateField,
+			postalCode: this.renderPostalCodeField,
+		};
 	}
 
 	componentDidMount() {
@@ -325,7 +336,7 @@ export class DomainDetailsForm extends PureComponent {
 		);
 	}
 
-	renderNameFields() {
+	renderNameFields = () => {
 		return (
 			<div>
 				<Input
@@ -340,9 +351,9 @@ export class DomainDetailsForm extends PureComponent {
 				/>
 			</div>
 		);
-	}
+	};
 
-	renderOrganizationField() {
+	renderOrganizationField = () => {
 		return (
 			<HiddenInput
 				label={ this.props.translate( 'Organization' ) }
@@ -356,13 +367,13 @@ export class DomainDetailsForm extends PureComponent {
 				{ ...this.getFieldProps( 'organization' ) }
 			/>
 		);
-	}
+	};
 
-	renderEmailField() {
+	renderEmailField = () => {
 		return <Input label={ this.props.translate( 'Email' ) } { ...this.getFieldProps( 'email' ) } />;
-	}
+	};
 
-	renderCountryField() {
+	renderCountryField = () => {
 		return (
 			<CountrySelect
 				label={ this.props.translate( 'Country' ) }
@@ -370,13 +381,15 @@ export class DomainDetailsForm extends PureComponent {
 				{ ...this.getFieldProps( 'country-code' ) }
 			/>
 		);
-	}
+	};
 
-	renderFaxField() {
-		return <Input label={ this.props.translate( 'Fax' ) } { ...this.getFieldProps( 'fax' ) } />;
-	}
+	renderFaxField = () => {
+		return this.needsFax() ? (
+			<Input label={ this.props.translate( 'Fax' ) } { ...this.getFieldProps( 'fax' ) } />
+		) : null;
+	};
 
-	renderPhoneField() {
+	renderPhoneField = () => {
 		const label = this.props.translate( 'Phone' );
 
 		return (
@@ -388,7 +401,7 @@ export class DomainDetailsForm extends PureComponent {
 				{ ...omit( this.getFieldProps( 'phone' ), 'onChange' ) }
 			/>
 		);
-	}
+	};
 
 	renderAddressFields = () => {
 		return (
@@ -420,7 +433,7 @@ export class DomainDetailsForm extends PureComponent {
 			<StateSelect
 				label={ this.props.translate( 'State' ) }
 				countryCode={ countryCode }
-				{ ...this.getFieldProps( 'state' ) }
+				{ ...this.getFieldProps( 'state', true ) }
 			/>
 		);
 	};
@@ -434,56 +447,33 @@ export class DomainDetailsForm extends PureComponent {
 		);
 	};
 
-	renderCountryDependentAddressFields( needsOnlyGoogleAppsDetails ) {
-		const { isStateRequiredInAddress } = this.props;
+	renderContactDetailsFields() {
+		const { contactDetails } = this.props,
+			countryCode = ( contactDetails || {} ).countryCode;
 		return (
-			<div className="checkout__domain-details-country-dependent-address-fields">
-				{ ! needsOnlyGoogleAppsDetails && this.renderAddressFields() }
-				{ ! needsOnlyGoogleAppsDetails && this.renderCityField() }
-				{ isStateRequiredInAddress && ! needsOnlyGoogleAppsDetails && this.renderStateField() }
-				{ this.renderPostalCodeField() }
+			<div>
+				{ this.renderOrganizationField() }
+				{ this.renderEmailField() }
+				{ this.renderPhoneField() }
+				{ this.renderFaxField() }
+				<RenderDomainFieldset countryCode={ countryCode } { ...this.fieldRenderMethods } />
+				{ this.renderCountryField() }
 			</div>
 		);
 	}
 
-	renderDetailsForm( needsOnlyGoogleAppsDetails ) {
-		// UsDomainContactForm
-		// props
-		// countryCode: formState.getFieldValue( this.state.form, 'countryCode' )
-		// countriesList
-		// phoneCountryCode
-		// handlePhoneChange
-		// needsFax
-		// getFieldProps
-		// numberOfDomainRegistrations: this.getNumberOfDomainRegistrations
-		const { contactDetails, translate } = this.props,
-			countryCode = ( contactDetails || {} ).countryCode;
-		// see below: this.getFieldProps.bind( this )
-		// this is an anti-pattern, but we need to bind context every time
+	renderDetailsForm() {
 		return (
 			<form>
 				{ this.renderNameFields() }
-				{ ! needsOnlyGoogleAppsDetails && this.renderOrganizationField() }
-				{ ! needsOnlyGoogleAppsDetails && this.renderEmailField() }
-				{ ! needsOnlyGoogleAppsDetails && this.renderPhoneField() }
-				{ ! needsOnlyGoogleAppsDetails && this.needsFax() && this.renderFaxField() }
-				{ /*{ this.shouldDisplayAddressFieldset() &&*/ }
-				{ /*this.renderCountryDependentAddressFields( needsOnlyGoogleAppsDetails ) }*/ }
-				<UsAddressFields
-					getFieldProps={ this.getFieldProps }
-					translate={ translate }
-					countryCode={ countryCode }
-				/>
-
-				{ /*<UsAddressFieldsRender*/ }
-				{ /*renderMethodArray={ [*/ }
-				{ /*this.renderAddressFields,*/ }
-				{ /*this.renderCityField,*/ }
-				{ /*this.renderStateField,*/ }
-				{ /*this.renderPostalCodeField,*/ }
-				{ /*] }*/ }
-				{ /*/>*/ }
-				{ this.renderCountryField() }
+				{ this.needsOnlyGoogleAppsDetails() ? (
+					<RenderDomainFieldset
+						needsOnlyGoogleAppsDetails={ true }
+						{ ...this.fieldRenderMethods }
+					/>
+				) : (
+					this.renderContactDetailsFields()
+				) }
 				{ this.renderSubmitButton() }
 			</form>
 		);
