@@ -61,7 +61,7 @@ export class RenderDomainFieldset extends PureComponent {
 	};
 
 	static defaultProps = {
-		needsOnlyGoogleAppsDetails: [],
+		needsOnlyGoogleAppsDetails: false,
 		countryCode: 'US',
 	};
 
