@@ -13,7 +13,7 @@
       "dev": true,
       "dependencies": {
         "ast-types": {
-          "version": "0.9.11",
+          "version": "0.9.12",
           "dev": true
         },
         "esprima": {
@@ -25,11 +25,11 @@
           "dev": true
         },
         "recast": {
-          "version": "0.12.6",
+          "version": "0.12.7",
           "dev": true
         },
         "source-map": {
-          "version": "0.5.7",
+          "version": "0.6.1",
           "dev": true
         }
       }
@@ -1253,7 +1253,7 @@
       "version": "1.1.6"
     },
     "create-react-class": {
-      "version": "15.6.0"
+      "version": "15.6.2"
     },
     "creditcards": {
       "version": "2.1.2"
@@ -1346,7 +1346,7 @@
       "version": "1.0.7"
     },
     "d3-time-format": {
-      "version": "2.0.5"
+      "version": "2.1.0"
     },
     "dashdash": {
       "version": "1.14.1"
@@ -1700,7 +1700,7 @@
       }
     },
     "es5-ext": {
-      "version": "0.10.30"
+      "version": "0.10.31"
     },
     "es6-error": {
       "version": "4.0.2"
@@ -5598,20 +5598,20 @@
       }
     },
     "react": {
-      "version": "15.4.0"
+      "version": "15.6.2"
     },
     "react-addons-create-fragment": {
-      "version": "15.4.0"
+      "version": "15.6.2"
     },
     "react-addons-linked-state-mixin": {
-      "version": "15.4.0"
+      "version": "15.6.2"
     },
     "react-addons-test-utils": {
-      "version": "15.4.0",
+      "version": "15.6.2",
       "dev": true
     },
     "react-click-outside": {
-      "version": "2.1.0"
+      "version": "2.3.1"
     },
     "react-codemod": {
       "version": "4.0.0",
@@ -5839,7 +5839,10 @@
       }
     },
     "react-dom": {
-      "version": "15.4.0"
+      "version": "15.6.2"
+    },
+    "react-dom-factories": {
+      "version": "1.0.2"
     },
     "react-element-to-jsx-string": {
       "version": "3.2.0",
@@ -5857,7 +5860,7 @@
       }
     },
     "react-modal": {
-      "version": "1.6.5",
+      "version": "1.9.7",
       "dependencies": {
         "lodash.assign": {
           "version": "4.2.0"
@@ -5868,7 +5871,12 @@
       "version": "1.0.2"
     },
     "react-redux": {
-      "version": "5.0.3"
+      "version": "5.0.6",
+      "dependencies": {
+        "hoist-non-react-statics": {
+          "version": "2.3.1"
+        }
+      }
     },
     "react-test-env": {
       "version": "0.2.0",
@@ -5899,6 +5907,10 @@
           "dev": true
         }
       }
+    },
+    "react-test-renderer": {
+      "version": "15.6.2",
+      "dev": true
     },
     "react-transition-group": {
       "version": "1.2.1",
@@ -7339,7 +7351,7 @@
           "dev": true
         },
         "express": {
-          "version": "4.16.1",
+          "version": "4.16.2",
           "dev": true
         },
         "filesize": {
