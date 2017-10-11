@@ -142,21 +142,7 @@ describe( 'Domain Details Form', () => {
 		expect( wrapper.find( 'PrivacyProtection' ) ).to.have.length( 1 );
 	} );
 
-	describe.skip( '#shouldDisplayAddressFieldset', () => {
-		it( 'should return `true` when valid country code exists', () => {
-			const wrapper = shallow( <DomainDetailsForm { ...propsWithCountry } /> );
-
-			expect( wrapper.instance().shouldDisplayAddressFieldset() ).to.be.true;
-		} );
-
-		it( 'should return `false` when valid country code exists', () => {
-			const wrapper = shallow( <DomainDetailsForm { ...defaultProps } /> );
-
-			expect( wrapper.instance().shouldDisplayAddressFieldset() ).to.be.false;
-		} );
-	} );
-
-	describe.skip( 'Country selection', () => {
+	describe( 'Country selection', () => {
 		let needsOnlyGoogleAppsDetailsStub;
 
 		useSandbox( sandbox => {
@@ -166,32 +152,10 @@ describe( 'Domain Details Form', () => {
 			);
 		} );
 
-		it( 'should render address with state field when countryCode is US/AU/CA', () => {
-			const wrapper = shallow(
-					<DomainDetailsForm { ...propsWithCountry } isStateRequiredInAddress={ true } />
-				),
-				stateInput = wrapper.find( '[name="state"]' );
-
-			expect( wrapper.find( 'PaymentBox' ).get( 0 ).props.classSet ).to.not.contain( 'eu-address' );
-			expect( stateInput.length ).to.equal( 1 );
-			expect( stateInput.get( 0 ).props.countryCode ).to.equal( 'AU' );
-		} );
-
-		it( 'should render address without state field when countryCode is not US/AU/CA', () => {
-			const wrapper = shallow(
-				<DomainDetailsForm { ...defaultProps } isStateRequiredInAddress={ false } />
-			);
-
-			expect( wrapper.find( 'PaymentBox' ).get( 0 ).props.classSet ).to.contain( 'eu-address' );
-			expect( wrapper.find( '[name="state"]' ) ).to.have.length( 0 );
-		} );
-
-		test( 'should not render address fieldset with no country data', () => {
+		test( 'should not render address fieldset when a country code is not available', () => {
 			const wrapper = shallow( <DomainDetailsForm { ...defaultProps } /> );
 
-			expect(
-				wrapper.find( '.checkout__domain-details-country-dependent-address-fields' )
-			).to.have.length( 0 );
+			expect( wrapper.find( 'RegionAddressFieldsets' ) ).to.have.length( 0 );
 		} );
 
 		test( 'should not render address fieldset when no country selected', () => {
@@ -199,26 +163,21 @@ describe( 'Domain Details Form', () => {
 				<DomainDetailsForm { ...defaultProps } contactDetails={ { countryCode: '' } } />
 			);
 
-			expect(
-				wrapper.find( '.checkout__domain-details-country-dependent-address-fields' )
-			).to.have.length( 0 );
+			expect( wrapper.find( 'RegionAddressFieldsets' ) ).to.have.length( 0 );
 		} );
 
 		test( 'should render address fieldset when a valid countryCode is selected', () => {
 			const wrapper = shallow( <DomainDetailsForm { ...propsWithCountry } /> );
 
-			expect(
-				wrapper.find( '.checkout__domain-details-country-dependent-address-fields' )
-			).to.have.length( 1 );
+			expect( wrapper.find( 'RegionAddressFieldsets' ) ).to.have.length( 1 );
 		} );
 
 		test( 'should render address, city, and postal code fields when the cart does not contain a Google App ', () => {
 			needsOnlyGoogleAppsDetailsStub.returns( false );
 			const wrapper = shallow( <DomainDetailsForm { ...propsWithCountry } /> );
 
-			expect(
-				wrapper.find( '.checkout__domain-details-country-dependent-address-fields Input' )
-			).to.have.length( 3 );
+			expect( wrapper.find( 'GAppsFields' ) ).to.have.length( 0 );
+			expect( wrapper.find( '.checkout__domain-contact-details-fields' ) ).to.have.length( 1 );
 		} );
 
 		test( 'should render postal code field when the cart contains only a Google App ', () => {
@@ -226,11 +185,8 @@ describe( 'Domain Details Form', () => {
 
 			const wrapper = shallow( <DomainDetailsForm { ...propsWithCountry } /> );
 
-			const inputs = wrapper.find(
-				'.checkout__domain-details-country-dependent-address-fields Input'
-			);
-			expect( inputs ).to.have.length( 1 );
-			expect( inputs.get( 0 ).props.name ).to.equal( 'postal-code' );
+			expect( wrapper.find( 'GAppsFields' ) ).to.have.length( 1 );
+			expect( wrapper.find( '.checkout__domain-contact-details-fields' ) ).to.have.length( 0 );
 		} );
 	} );
 } );

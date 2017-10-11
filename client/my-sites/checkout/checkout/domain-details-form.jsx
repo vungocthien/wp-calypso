@@ -381,20 +381,22 @@ export class DomainDetailsForm extends PureComponent {
 		);
 	}
 
-	renderContactDetailsFields() {
+	renderDomainContactDetailsFields() {
 		const { translate, contactDetails } = this.props,
 			countryCode = ( contactDetails || {} ).countryCode;
 		return (
-			<div>
+			<div className="checkout__domain-contact-details-fields">
 				{ this.renderOrganizationField() }
 				{ this.renderEmailField() }
 				{ this.renderPhoneField() }
 				{ this.renderFaxField() }
-				<RegionAddressFieldsets
-					getFieldProps={ this.getFieldProps }
-					translate={ translate }
-					countryCode={ countryCode }
-				/>
+				{ countryCode && (
+					<RegionAddressFieldsets
+						getFieldProps={ this.getFieldProps }
+						translate={ translate }
+						countryCode={ countryCode }
+					/>
+				) }
 				{ this.renderCountryField() }
 			</div>
 		);
@@ -409,7 +411,7 @@ export class DomainDetailsForm extends PureComponent {
 				{ this.needsOnlyGoogleAppsDetails() ? (
 					<GAppsFields getFieldProps={ this.getFieldProps } translate={ translate } />
 				) : (
-					this.renderContactDetailsFields()
+					this.renderDomainContactDetailsFields()
 				) }
 				{ this.renderSubmitButton() }
 			</form>

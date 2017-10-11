@@ -1,5 +1,5 @@
 /**
- * External dependencies
+ * External	 dependencies
  *
  * @format
  */
@@ -12,14 +12,22 @@ import noop from 'lodash/noop';
 /**
  * Internal dependencies
  */
-import { CHECKOUT_EU_ADDRESS_FORMAT_COUNTRY_CODES } from 'my-sites/domains/components/domain-form-fieldsets/constants';
-import UsAddressFields from 'my-sites/domains/components/domain-form-fieldsets/us-address-fieldset';
-import EuAddressFields from 'my-sites/domains/components/domain-form-fieldsets/eu-address-fieldset';
+import {
+	CHECKOUT_EU_ADDRESS_FORMAT_COUNTRY_CODES,
+	CHECKOUT_UK_ADDRESS_FORMAT_COUNTRY_CODES,
+} from './constants';
+import UsAddressFields from './us-address-fieldset';
+import EuAddressFields from './eu-address-fieldset';
+import UkAddressFields from './uk-address-fieldset';
 
 const regionAddressFieldsetComponents = [
 	{
 		keys: CHECKOUT_EU_ADDRESS_FORMAT_COUNTRY_CODES,
 		component: EuAddressFields,
+	},
+	{
+		keys: CHECKOUT_UK_ADDRESS_FORMAT_COUNTRY_CODES,
+		component: UkAddressFields,
 	},
 ];
 
@@ -39,10 +47,7 @@ function getAddressComponent( formTypesArray, key ) {
 	const formTypesArrayLength = formTypesArray.length;
 	let Component;
 	for ( let i = 0; i < formTypesArrayLength; i++ ) {
-		if (
-			Array.isArray( formTypesArray[ i ].keys ) &&
-			formTypesArray[ i ].keys.indexOf( key ) > -1
-		) {
+		if ( formTypesArray[ i ].keys.indexOf( key ) > -1 ) {
 			Component = formTypesArray[ i ].component;
 			break;
 		}
@@ -51,18 +56,15 @@ function getAddressComponent( formTypesArray, key ) {
 }
 
 const RegionAddressFieldsets = ( { getFieldProps, translate, countryCode } ) => {
-	if ( countryCode ) {
-		const Component =
-			getAddressComponent( regionAddressFieldsetComponents, countryCode ) || UsAddressFields;
-		return (
-			<Component
-				getFieldProps={ getFieldProps }
-				translate={ translate }
-				countryCode={ countryCode }
-			/>
-		);
-	}
-	return null;
+	const Component =
+		getAddressComponent( regionAddressFieldsetComponents, countryCode ) || UsAddressFields;
+	return (
+		<Component
+			getFieldProps={ getFieldProps }
+			translate={ translate }
+			countryCode={ countryCode }
+		/>
+	);
 };
 
 RegionAddressFieldsets.propTypes = {

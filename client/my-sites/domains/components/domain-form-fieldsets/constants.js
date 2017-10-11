@@ -1,5 +1,4 @@
-export const CHECKOUT_US_ADDRESS_FORMAT_COUNTRY_CODES = [ 'AU', 'CA', 'US' ];
-export const CHECKOUT_UK_ADDRESS_FORMAT_COUNTRY_CODES = [ 'UK' ];
+export const CHECKOUT_UK_ADDRESS_FORMAT_COUNTRY_CODES = [ 'GB', 'IE' ];
 export const CHECKOUT_EU_ADDRESS_FORMAT_COUNTRY_CODES = [
 	'AR', 'AT', 'BA', 'BG', 'BE',
 	'CH', 'CL', 'CN', 'CZ', 'DE',
