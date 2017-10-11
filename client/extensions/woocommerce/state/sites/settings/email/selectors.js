@@ -94,9 +94,10 @@ export const isApiKeyCorrect = ( state, siteId ) => {
 			siteId,
 			'settings',
 			'email',
-			'apiKeyCorrect' ];
+			'settings',
+			'mailchimp_account_info_id' ];
 
-	return get( state, path, true );
+	return !! get( state, path, true );
 };
 
 export const isRequestingLists = ( state, siteId ) => {

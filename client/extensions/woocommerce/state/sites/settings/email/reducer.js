@@ -32,7 +32,13 @@ import {
 	WOOCOMMERCE_MAILCHIMP_NEWSLETTER_SETTINGS_SUBMIT_FAILURE
 } from 'woocommerce/state/action-types';
 
-
+/**
+ * Updates state with latest MailChimp connected plugin settings
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function settings( state = {}, action ) {
 	switch ( action.type ) {
 		case WOOCOMMERCE_MAILCHIMP_SETTINGS_REQUEST_SUCCESS:
@@ -57,6 +63,13 @@ function settings( state = {}, action ) {
 	return state;
 }
 
+/**
+ * Updates state with settings request status
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function settingsRequest( state = false, { type } ) {
 	switch ( type ) {
 		case WOOCOMMERCE_MAILCHIMP_SETTINGS_REQUEST:
@@ -68,6 +81,14 @@ function settingsRequest( state = false, { type } ) {
 	return state;
 }
 
+/**
+ * Updates state with settings request error
+ * Holds information only for latest request
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function settingsRequestError( state = false, action ) {
 	switch ( action.type ) {
 		case WOOCOMMERCE_MAILCHIMP_SETTINGS_REQUEST_SUCCESS:
@@ -80,6 +101,14 @@ function settingsRequestError( state = false, action ) {
 	return state;
 }
 
+/**
+ * Updates state with latest MailChimp connected plugin sync status.
+ * This is sync between plugin and mailchimp server
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function syncStatus( state = {}, action ) {
 	switch ( action.type ) {
 		case WOOCOMMERCE_MAILCHIMP_SYNC_STATUS_REQUEST_SUCCESS:
@@ -90,6 +119,13 @@ function syncStatus( state = {}, action ) {
 	return state;
 }
 
+/**
+ * Updates state with sync status request status
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function syncStatusRequest( state = false, { type } ) {
 	switch ( type ) {
 		case WOOCOMMERCE_MAILCHIMP_SYNC_STATUS_REQUEST:
@@ -101,6 +137,14 @@ function syncStatusRequest( state = false, { type } ) {
 	return state;
 }
 
+/**
+ * Updates state with sync status request error
+ * Holds information only for latest request
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function syncStatusRequestError( state = false, action ) {
 	switch ( action.type ) {
 		case WOOCOMMERCE_MAILCHIMP_SYNC_STATUS_REQUEST_SUCCESS:
@@ -113,6 +157,13 @@ function syncStatusRequestError( state = false, action ) {
 	return state;
 }
 
+/**
+ * Updates state with resync request status
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function resyncRequest( state = false, { type } ) {
 	switch ( type ) {
 		case WOOCOMMERCE_MAILCHIMP_RESYNC_REQUEST:
@@ -124,6 +175,14 @@ function resyncRequest( state = false, { type } ) {
 	return state;
 }
 
+/**
+ * Updates state with sync status request error
+ * Holds information only for latest request
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function resyncRequestError( state = false, action ) {
 	switch ( action.type ) {
 		case WOOCOMMERCE_MAILCHIMP_RESYNC_REQUEST_SUCCESS:
@@ -136,6 +195,13 @@ function resyncRequestError( state = false, action ) {
 	return state;
 }
 
+/**
+ * Updates state with api key submit status
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function apiKeySubmit( state = false, { type } ) {
 	switch ( type ) {
 		case WOOCOMMERCE_MAILCHIMP_API_KEY_SUBMIT:
@@ -147,15 +213,14 @@ function apiKeySubmit( state = false, { type } ) {
 	return state;
 }
 
-function apiKeyCorrect( state = true, action ) {
-	switch ( action.type ) {
-		case WOOCOMMERCE_MAILCHIMP_API_KEY_SUBMIT_SUCCESS:
-			return !! action.settings.mailchimp_account_info_id;
-	}
-
-	return state;
-}
-
+/**
+ * Updates state with api key submit error
+ * Holds information only for latest request
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function apiKeySubbmitError( state = false, action ) {
 	switch ( action.type ) {
 		case WOOCOMMERCE_MAILCHIMP_API_KEY_SUBMIT_SUCCESS:
@@ -168,6 +233,13 @@ function apiKeySubbmitError( state = false, action ) {
 	return state;
 }
 
+/**
+ * Updates state with store info submit status
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function storeInfoSubmit( state = false, { type } ) {
 	switch ( type ) {
 		case WOOCOMMERCE_MAILCHIMP_STORE_INFO_SUBMIT:
@@ -179,6 +251,14 @@ function storeInfoSubmit( state = false, { type } ) {
 	return state;
 }
 
+/**
+ * Updates state with store info submit error
+ * Holds information only for latest request
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function storeInfoSubmitError( state = false, action ) {
 	switch ( action.type ) {
 		case WOOCOMMERCE_MAILCHIMP_STORE_INFO_SUBMIT_SUCCESS:
@@ -191,6 +271,13 @@ function storeInfoSubmitError( state = false, action ) {
 	return state;
 }
 
+/**
+ * Updates state with lists request status
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function listsRequest( state = false, { type } ) {
 	switch ( type ) {
 		case WOOCOMMERCE_MAILCHIMP_LISTS_REQUEST:
@@ -202,6 +289,14 @@ function listsRequest( state = false, { type } ) {
 	return state;
 }
 
+/**
+ * Updates state with list request error
+ * Holds information only for latest request
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function listsRequestError( state = false, action ) {
 	switch ( action.type ) {
 		case WOOCOMMERCE_MAILCHIMP_LISTS_REQUEST_SUCCESS:
@@ -214,6 +309,13 @@ function listsRequestError( state = false, action ) {
 	return state;
 }
 
+/**
+ * Updates state with newsletter submit status
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function newsletterSettingsSubmit( state = false, { type } ) {
 	switch ( type ) {
 		case WOOCOMMERCE_MAILCHIMP_NEWSLETTER_SETTINGS_SUBMIT:
@@ -225,6 +327,14 @@ function newsletterSettingsSubmit( state = false, { type } ) {
 	return state;
 }
 
+/**
+ * Updates state with newsletter settings submit error
+ * Holds information only for latest request
+ *
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action
+ * @return {Object}        Updated state
+ */
 function newsletterSettingsSubmitError( state = false, action ) {
 	switch ( action.type ) {
 		case WOOCOMMERCE_MAILCHIMP_NEWSLETTER_SETTINGS_SUBMIT_SUCCESS:
@@ -248,7 +358,6 @@ export default combineReducers( {
 	resyncRequestError,
 	apiKeySubmit,
 	apiKeySubbmitError,
-	apiKeyCorrect,
 	storeInfoSubmit,
 	storeInfoSubmitError,
 	listsRequest,
