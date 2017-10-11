@@ -19,6 +19,7 @@ import { isEnabled } from 'config';
 import { isJetpackSite, getSite } from 'state/sites/selectors';
 import { isATEnabled } from 'lib/automated-transfer';
 import { getSectionName } from 'state/ui/selectors';
+import getLostFocusTimestamp from 'state/happychat/selectors/get-lostfocus-timestamp';
 
 // How much time needs to pass before we consider the session inactive:
 const HAPPYCHAT_INACTIVE_TIMEOUT_MS = 1000 * 60 * 10;
@@ -171,8 +172,6 @@ export const wasHappychatRecentlyActive = state => {
 
 	return now - lastActive < HAPPYCHAT_INACTIVE_TIMEOUT_MS;
 };
-
-export const getLostFocusTimestamp = createSelector( state => state.happychat.lostFocusAt );
 
 export const hasUnreadMessages = createSelector(
 	state => {
