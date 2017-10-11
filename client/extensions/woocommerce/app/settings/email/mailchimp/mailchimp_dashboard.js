@@ -75,7 +75,7 @@ const SyncTab = localize( ( { siteId, translate, syncState, resync } ) => {
 	);
 } );
 
-const Settings = localize( ( { translate, settings, oldCheckbox, isRequesting, onChange } ) => {
+const Settings = localize( ( { translate, settings, oldCheckbox, isSubbmittingSettings, onChange, onSave } ) => {
 	const onRadioChange = ( e ) => {
 		onChange( { mailchimp_checkbox_defaults: e.target.value } );
 	};
@@ -139,6 +139,15 @@ const Settings = localize( ( { translate, settings, oldCheckbox, isRequesting, o
 							<FormCheckbox checked={ checkbox === 'check' } disabled={ true } />
 							<span>{ settings.newsletter_label }</span>
 						</FormLabel>}
+				</div>
+				<div className="mailchimp__dashboard-settings-save">
+					<Button
+						primary
+						onClick={ onSave }
+						busy={ isSubbmittingSettings }
+						disabled={ isSubbmittingSettings }>
+						{ translate( 'Save' ) }
+					</Button>
 				</div>
 			</span>
 		</div>
@@ -209,18 +218,14 @@ class MailChimpDashboard extends React.Component {
 							settings={ this.state.settings }
 							isRequesting={ this.props.isRequestingSettings }
 							onChange={ this.onSettingsChange }
+							onSave={ this.onSave }
+							isSubbmittingSettings={ this.props.isSubmittingNewsletterSetting }
 							oldCheckbox={ this.props.settings.mailchimp_checkbox_defaults } />
 					</div>
 					<Button className="mailchimp__getting-started-button" onClick={ this.props.onClick }>
 						Start setup wizard.
 					</Button>
-					<Button
-						primary
-						onClick={ this.onSave }
-						busy={ this.props.isSubmittingNewsletterSetting }
-						disabled={ this.props.isSubmittingNewsletterSetting }>
-						{ translate( 'Save' ) }
-					</Button>
+
 				</Card>
 			</div>
 		);
