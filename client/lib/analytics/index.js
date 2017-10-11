@@ -160,6 +160,10 @@ function buildQuerystringNoPrefix( group, name ) {
 // this helps avoid some nasty coupling, but it's not the cleanest code - sorry.
 let mostRecentUrlPath = null;
 
+// record the last path of a `calypso_page_view` tracks event. Useful for building
+// flows of page interactions (sankey diagrams).
+let lastPageViewPath = null;
+
 if ( typeof window !== 'undefined' ) {
 	window.addEventListener( 'popstate', function() {
 		// throw away our URL value if the user used the back/forward buttons
@@ -237,14 +241,16 @@ const analytics = {
 
 	// pageView is a wrapper for pageview events across Tracks and GA
 	pageView: {
-		record: function( urlPath, pageTitle, params ) {
+		record: function( urlPath, pageTitle, params = {} ) {
 			// add delay to avoid stale `_dl` in recorded calypso_page_view event details
 			// `_dl` (browserdocumentlocation) is read from the current URL by external JavaScript
 			setTimeout( () => {
 				mostRecentUrlPath = urlPath;
+				params.last_pageview_path = lastPageViewPath;
 				analytics.tracks.recordPageView( urlPath, params );
 				analytics.ga.recordPageView( urlPath, pageTitle );
 				analytics.emit( 'page-view', urlPath, pageTitle );
+				lastPageViewPath = urlPath;
 			}, 0 );
 		},
 	},
