@@ -16,7 +16,8 @@ import HappychatButton from 'components/happychat/button';
 import HappychatConnection from 'components/happychat/connection';
 import { isEnabled } from 'config';
 import { getCurrentUserId } from 'state/current-user/selectors';
-import { hasActiveHappychatSession, isHappychatAvailable } from 'state/happychat/selectors';
+import { isHappychatAvailable } from 'state/happychat/selectors';
+import hasActiveHappychatSession from 'state/happychat/selectors/has-active-happychat-session';
 
 const JetpackConnectHappychatButton = ( {
 	children,
