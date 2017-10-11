@@ -593,6 +593,31 @@
 					width: 66%;
 				}
 			}
+
+			&.eu-domain-address-details-form,
+			&.gb-domain-address-details-form {
+				.postal-code {
+					width: calc( 33% - 7px );
+				}
+
+				.city {
+					width: calc( 66% );
+				}
+
+				.state {
+					display: none;
+				}
+			}
+
+			&.eu-domain-address-details-form {
+				.postal-code {
+					float: left;
+				}
+
+				.city {
+					float: right;
+				}
+			}
 		}
 
 		.hidden-input a {

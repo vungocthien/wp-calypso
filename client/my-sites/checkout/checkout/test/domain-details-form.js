@@ -142,7 +142,7 @@ describe( 'Domain Details Form', () => {
 		expect( wrapper.find( 'PrivacyProtection' ) ).to.have.length( 1 );
 	} );
 
-	describe( 'Country selection', () => {
+	describe.skip( 'Country selection', () => {
 		let needsOnlyGoogleAppsDetailsStub;
 
 		useSandbox( sandbox => {

@@ -17,6 +17,7 @@ import {
 	includes,
 	indexOf,
 	intersection,
+	isArray,
 	isEqual,
 	kebabCase,
 	last,
@@ -55,10 +56,24 @@ import ExtraInfoForm, {
 	tldsWithAdditionalDetailsForms,
 } from 'components/domains/registrant-extra-info';
 import config from 'config';
+import { CHECKOUT_ADDRESS_FORMAT_COUNTRY_CODES } from 'my-sites/checkout/checkout/constants';
 
 const debug = debugFactory( 'calypso:my-sites:upgrades:checkout:domain-details' );
 const wpcom = wp.undocumented(),
 	countriesList = countriesListForDomainRegistrations();
+
+// For demonstration purposes only
+// Abstract this to utils or to a selector
+function getAddressRegionClassName( countryCodes = {}, countryCode = '' ) {
+	for ( const regionKey in countryCodes ) {
+		if ( countryCodes.hasOwnProperty( regionKey ) &&
+			isArray( countryCodes[ regionKey ] ) &&
+			countryCodes[ regionKey ].indexOf( countryCode ) > -1 ) {
+			return regionKey.toLowerCase();
+		}
+	}
+	return 'us';
+}
 
 export class DomainDetailsForm extends PureComponent {
 	constructor( props, context ) {
@@ -86,6 +101,7 @@ export class DomainDetailsForm extends PureComponent {
 			form: null,
 			submissionCount: 0,
 			phoneCountryCode: 'US',
+			addressRegion: 'us',
 			steps,
 			currentStep: first( steps ),
 		};
@@ -195,17 +211,23 @@ export class DomainDetailsForm extends PureComponent {
 	};
 
 	handleChangeEvent = event => {
-		// Resets the state field every time the user selects a different country
 		if ( event.target.name === 'country-code' ) {
-			this.formStateController.handleFieldChange( {
-				name: 'state',
-				value: '',
-				hideError: true,
-			} );
-
-			if ( ! formState.getFieldValue( this.state.form, 'phone' ) ) {
+			if ( event.target.value ) {
 				this.setState( {
-					phoneCountryCode: event.target.value,
+					addressRegion: getAddressRegionClassName( CHECKOUT_ADDRESS_FORMAT_COUNTRY_CODES, event.target.value )
+				}, () => {
+					// Resets the state field every time the user selects a different country
+					this.formStateController.handleFieldChange( {
+						name: 'state',
+						value: '',
+						hideError: true,
+					} );
+
+					if ( ! formState.getFieldValue( this.state.form, 'phone' ) ) {
+						this.setState( {
+							phoneCountryCode: event.target.value,
+						} );
+					}
 				} );
 			}
 		}
@@ -424,13 +446,34 @@ export class DomainDetailsForm extends PureComponent {
 		);
 	}
 
-	renderCountryDependentAddressFields( needsOnlyGoogleAppsDetails ) {
+	renderHasOnlyGoogleAppsFields() {
 		return (
-			<div className="checkout__domain-details-country-dependent-address-fields">
-				{ ! needsOnlyGoogleAppsDetails && this.renderAddressFields() }
-				{ ! needsOnlyGoogleAppsDetails && this.renderCityField() }
-				{ ! needsOnlyGoogleAppsDetails && this.renderStateField() }
+			<div>
+				{ this.renderCountryField() }
 				{ this.renderPostalCodeField() }
+			</div>
+		);
+	}
+
+	renderCountryDependentAddressFields() {
+		return (
+			<div className="checkout__country-dependent-address-fields">
+				{ this.renderAddressFields() }
+				{ this.renderCityField() }
+				{ this.renderStateField() }
+				{ this.renderPostalCodeField() }
+			</div>
+		);
+	}
+
+	renderDomainFullDetailsFields() {
+		return (
+			<div className="checkout__domain-full-details">
+				{ this.renderOrganizationField() }
+				{ this.renderEmailField() }
+				{ this.renderPhoneField() }
+				{ this.needsFax() && this.renderFaxField() }
+				{ this.shouldDisplayAddressFieldset() && this.renderCountryDependentAddressFields() }
 			</div>
 		);
 	}
@@ -441,13 +484,10 @@ export class DomainDetailsForm extends PureComponent {
 		return (
 			<form>
 				{ this.renderNameFields() }
-				{ ! needsOnlyGoogleAppsDetails && this.renderOrganizationField() }
-				{ ! needsOnlyGoogleAppsDetails && this.renderEmailField() }
-				{ ! needsOnlyGoogleAppsDetails && this.renderPhoneField() }
+				{ needsOnlyGoogleAppsDetails
+					? this.renderHasOnlyGoogleAppsFields()
+					: this.renderDomainFullDetailsFields() }
 				{ this.renderCountryField() }
-				{ ! needsOnlyGoogleAppsDetails && this.needsFax() && this.renderFaxField() }
-				{ this.shouldDisplayAddressFieldset() &&
-					this.renderCountryDependentAddressFields( needsOnlyGoogleAppsDetails ) }
 				{ this.renderSubmitButton() }
 			</form>
 		);
@@ -536,11 +576,13 @@ export class DomainDetailsForm extends PureComponent {
 	}
 
 	render() {
-		const needsOnlyGoogleAppsDetails = this.needsOnlyGoogleAppsDetails(),
+		const { addressRegion } = this.state,
+			needsOnlyGoogleAppsDetails = this.needsOnlyGoogleAppsDetails(),
 			classSet = classNames( {
 				'domain-details': true,
 				selected: true,
 				'only-google-apps-details': needsOnlyGoogleAppsDetails,
+				[ `${ addressRegion }-domain-address-details-form` ]: true,
 			} );
 
 		let title;
