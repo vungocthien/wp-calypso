@@ -30,6 +30,11 @@ import {
 	WOOCOMMERCE_MAILCHIMP_NEWSLETTER_SETTINGS_SUBMIT_FAILURE,
 } from 'woocommerce/state/action-types';
 
+/**
+ * Following list is a set of helper functions that return
+ * redux action objects. Used to make actions functions more concise.
+ */
+
 const mailchimpSettingsRequest = ( siteId ) => ( {
 	type: WOOCOMMERCE_MAILCHIMP_SETTINGS_REQUEST,
 	siteId
@@ -166,6 +171,12 @@ const mailchimpNewsletterSettingsSubmitFailure = ( siteId, { error } ) => ( {
 	error
 } );
 
+/**
+ * Triggers a network request to fetch current MailChimp plugin settngs.
+ *
+ * @param  {Number|String} siteId        Jetpack site ID
+ * @return {Function}                    Action thunk
+ */
 export const requestSettings = ( siteId ) => ( dispatch, getState ) => {
 	const state = getState();
 	if ( ! siteId ) {
@@ -183,6 +194,13 @@ export const requestSettings = ( siteId ) => ( dispatch, getState ) => {
 		} );
 };
 
+/**
+ * Triggers a network request to set MailChimp api key in MailChimp plugin settings.
+ *
+ * @param  {Number|String} siteId        Jetpack site ID
+ * @param  {String}        apiKey        MailChimp api key
+ * @return {Function}                    Action thunk
+ */
 export const submitMailChimpApiKey = ( siteId, apiKey ) => ( dispatch, getState ) => {
 	const state = getState();
 	if ( ! siteId ) {
@@ -200,6 +218,13 @@ export const submitMailChimpApiKey = ( siteId, apiKey ) => ( dispatch, getState 
 		} );
 };
 
+/**
+ * Triggers a network request to set MailChimp store info in MailChimp plugin settings.
+ *
+ * @param  {Number|String} siteId        Jetpack site ID
+ * @param  {Object}        storeInfo     MailChimp store info settings object
+ * @return {Function}                    Action thunk
+ */
 export const submitMailchimpStoreInfo = ( siteId, storeInfo ) => ( dispatch, getState ) => {
 	const state = getState();
 	if ( ! siteId ) {
@@ -217,6 +242,14 @@ export const submitMailchimpStoreInfo = ( siteId, storeInfo ) => ( dispatch, get
 		} );
 };
 
+/**
+ * Triggers a network request to set MailChimp campaign defualts
+ * info in MailChimp plugin settings.
+ *
+ * @param  {Number|String} siteId           Jetpack site ID
+ * @param  {Object}        campaignDefaults MailChimp campaign defaults settings object
+ * @return {Function}                       Action thunk
+ */
 export const submitMailchimpCampaignDefaults = ( siteId, campaignDefaults ) => ( dispatch, getState ) => {
 	const state = getState();
 	if ( ! siteId ) {
@@ -234,6 +267,13 @@ export const submitMailchimpCampaignDefaults = ( siteId, campaignDefaults ) => (
 		} );
 };
 
+/**
+ * Triggers a network request to fetch current mailing list available created for account
+ * asociated with api key storred in plugin config..
+ *
+ * @param  {Number|String} siteId        Jetpack site ID
+ * @return {Function}                    Action thunk
+ */
 export const requestLists = ( siteId ) => ( dispatch, getState ) => {
 	const state = getState();
 	if ( ! siteId ) {
@@ -251,6 +291,12 @@ export const requestLists = ( siteId ) => ( dispatch, getState ) => {
 		} );
 };
 
+/**
+ * Triggers a network request to fetch current MailChimp plugin to maichimp server sync status
+ *
+ * @param  {Number|String} siteId        Jetpack site ID
+ * @return {Function}                    Action thunk
+ */
 export const requestSyncStatus = ( siteId ) => ( dispatch, getState ) => {
 	const state = getState();
 	if ( ! siteId ) {
@@ -267,6 +313,12 @@ export const requestSyncStatus = ( siteId ) => ( dispatch, getState ) => {
 		} );
 };
 
+/**
+ * Triggers a network request that triggers store resync procedure in MailChimp plugin
+ *
+ * @param  {Number|String} siteId        Jetpack site ID
+ * @return {Function}                    Action thunk
+ */
 export const requestResync = ( siteId ) => ( dispatch, getState ) => {
 	const state = getState();
 	if ( ! siteId ) {
@@ -283,6 +335,14 @@ export const requestResync = ( siteId ) => ( dispatch, getState ) => {
 		} );
 };
 
+/**
+ * Triggers a network request to set MailChimp newsletter settings
+ * in MailChimp plugin settings.
+ *
+ * @param  {Number|String} siteId      Jetpack site ID
+ * @param  {Object}        newsLetter  MailChimp newsletter settings object
+ * @return {Function}                  Action thunk
+ */
 export const submitMailchimpNewsletterSettings = ( siteId, newsLetter ) => ( dispatch, getState ) => {
 	const state = getState();
 	if ( ! siteId ) {
