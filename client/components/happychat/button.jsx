@@ -23,7 +23,7 @@ import {
 	hasActiveHappychatSession,
 } from 'state/happychat/selectors';
 import { connectChat } from 'state/happychat/actions';
-import { openChat } from 'state/ui/happychat/actions';
+import { openChat } from 'state/happychat/ui/actions';
 import Button from 'components/button';
 
 class HappychatButton extends Component {
