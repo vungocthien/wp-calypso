@@ -24,6 +24,7 @@ import FormFieldset from 'components/forms/form-fieldset';
 import FormLabel from 'components/forms/form-label';
 import FormTextarea from 'components/forms/form-textarea';
 import {
+	getOrderFeeTax,
 	getOrderLineItemTax,
 	getOrderRefundTotal,
 	getOrderShippingTax,
@@ -91,7 +92,15 @@ class OrderPaymentCard extends Component {
 
 	getInitialRefund = () => {
 		const { order } = this.props;
-		return parseFloat( getOrderShippingTax( order ) ) + parseFloat( order.shipping_total );
+		return (
+			sum(
+				order.fee_lines.map( ( item, i ) => {
+					return parseFloat( item.total ) + parseFloat( getOrderFeeTax( order, i ) );
+				} )
+			) +
+			parseFloat( getOrderShippingTax( order ) ) +
+			parseFloat( order.shipping_total )
+		);
 	};
 
 	recalculateRefund = data => {
@@ -99,8 +108,9 @@ class OrderPaymentCard extends Component {
 		if ( ! order ) {
 			return 0;
 		}
-		const subtotal = sum(
-			data.quantities.map( ( q, i ) => {
+		const subtotal = sum( [
+			...data.fees,
+			...data.quantities.map( ( q, i ) => {
 				if ( ! order.line_items[ i ] ) {
 					return 0;
 				}
@@ -112,8 +122,8 @@ class OrderPaymentCard extends Component {
 
 				const tax = getOrderLineItemTax( order, i ) / order.line_items[ i ].quantity;
 				return ( price + tax ) * q;
-			} )
-		);
+			} ),
+		] );
 		const total = subtotal + ( parseFloat( data.shippingTotal ) || 0 );
 		return total;
 	};
