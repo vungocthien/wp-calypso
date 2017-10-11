@@ -1,15 +1,24 @@
+/** @format */
 jest.mock( 'config', () => ( {
 	isEnabled: () => true,
 } ) );
-jest.mock( 'devdocs/components-usage-stats.json', () => ( {
-	'components/foo': { count: 10 },
-	'components/foo/docs/': { count: 1 },
-	'foo/components/bar': { count: 1 },
-	'my-page/index.js': { count: 1 },
-} ), { virtual: true } );
-jest.mock( 'devdocs/search-index', () => ( {
-	index: {},
-} ), { virtual: true } );
+jest.mock(
+	'devdocs/components-usage-stats.json',
+	() => ( {
+		'components/foo': { count: 10 },
+		'components/foo/docs/': { count: 1 },
+		'foo/components/bar': { count: 1 },
+		'my-page/index.js': { count: 1 },
+	} ),
+	{ virtual: true }
+);
+jest.mock(
+	'devdocs/search-index',
+	() => ( {
+		index: {},
+	} ),
+	{ virtual: true }
+);
 jest.mock( 'lunr', () => ( {
 	Index: {
 		load: () => null,

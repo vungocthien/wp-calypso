@@ -1,3 +1,4 @@
+/** @format */
 var config = require( 'config' ),
 	utils = require( './utils' );
 
@@ -17,7 +18,7 @@ function getSectionsModule( sections ) {
 			"\trestoreLastSession = require( 'lib/restore-last-path' ).restoreLastSession,",
 			"\tpreloadHub = require( 'sections-preload' ).hub;",
 			'\n',
-			'var _loadedSections = {};\n'
+			'var _loadedSections = {};\n',
 		].join( '\n' );
 
 		sections.forEach( function( section ) {
@@ -44,14 +45,14 @@ function getSectionsModule( sections ) {
 			'	load: function() {',
 			'		' + sectionLoaders,
 			'	}',
-			'};'
+			'};',
 		].join( '\n' );
 	}
 
 	dependencies = [
 		"var config = require( 'config' ),",
 		"\tpage = require( 'page' ),",
-		"\tcontroller = require( 'controller' );\n"
+		"\tcontroller = require( 'controller' );\n",
 	].join( '\n' );
 
 	sectionLoaders = getRequires( sections );
@@ -65,7 +66,7 @@ function getSectionsModule( sections ) {
 		'	load: function() {',
 		'		' + sectionLoaders,
 		'	}',
-		'};'
+		'};',
 	].join( '\n' );
 }
 
@@ -123,7 +124,7 @@ function splitTemplate( path, section ) {
 		'		return;',
 		'	},',
 		sectionNameString + ' );',
-		'} );\n'
+		'} );\n',
 	];
 
 	return result.join( '\n' );
@@ -138,8 +139,7 @@ function getPathRegex( pathString ) {
 }
 
 function requireTemplate( section ) {
-	var pathRegex,
-		result;
+	var pathRegex, result;
 
 	result = section.paths.reduce( function( acc, path ) {
 		pathRegex = getPathRegex( path );
@@ -153,7 +153,7 @@ function requireTemplate( section ) {
 			'	controller.setSection( ' + JSON.stringify( section ) + ' )( context );',
 			'	require( ' + JSON.stringify( section.module ) + ' )( controller.clientRouter );',
 			'	next();',
-			'} );\n'
+			'} );\n',
 		] );
 	}, [] );
 
@@ -164,16 +164,22 @@ function singleEnsure( chunkName ) {
 	var result = [
 		'case ' + JSON.stringify( chunkName ) + ':',
 		'	return require.ensure([], function() {}, ' + JSON.stringify( chunkName ) + ' );',
-		'	break;\n'
+		'	break;\n',
 	];
 
 	return result.join( '\n' );
 }
 
 function sectionsWithCSSUrls( sections ) {
-	return sections.map( section => Object.assign( {}, section, section.css && {
-		cssUrls: utils.getCssUrls( section.css )
-	} ) );
+	return sections.map( section =>
+		Object.assign(
+			{},
+			section,
+			section.css && {
+				cssUrls: utils.getCssUrls( section.css ),
+			}
+		)
+	);
 }
 
 module.exports = function( content ) {
