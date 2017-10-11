@@ -8,7 +8,7 @@ import page from 'page';
 import ReactDom from 'react-dom';
 import React from 'react';
 import i18n from 'i18n-calypso';
-import { uniq, some, startsWith } from 'lodash';
+import { uniq, some, startsWith, endsWith } from 'lodash';
 
 /**
  * Internal Dependencies
@@ -272,7 +272,7 @@ function createSitesComponent( context ) {
 	);
 }
 
-function showMissingPrimaryError( currentUser, dispatch ) {
+function showMissingPrimaryError( currentUser, dispatch, context, next ) {
 	const { username, primary_blog, primary_blog_url, primary_blog_is_jetpack } = currentUser;
 	const tracksPayload = {
 		username,
@@ -293,8 +293,16 @@ function showMissingPrimaryError( currentUser, dispatch ) {
 			tracksPayload
 		);
 	} else {
+		// Maybe not needed if it takes milliseconds
+		dispatch(
+			warningNotice( i18n.translate( 'Hang on, I need a second' ), {
+				button: 'refresh',
+				href: context.pathname,
+			} )
+		);
 		analytics.tracks.recordEvent( 'calypso_mysites_single_site_error', tracksPayload );
 	}
+	next();
 }
 
 module.exports = {
@@ -318,7 +326,12 @@ module.exports = {
 		const primary = getSite( getState(), primaryId ) || '';
 
 		const redirectToPrimary = () => {
-			let redirectPath = `${ context.pathname }/${ primary.slug }`;
+			let redirectPath;
+			if ( endsWith( context.pathname, 'undefined' ) ) {
+				redirectPath = context.pathname;
+			} else {
+				redirectPath = `${ context.pathname }/${ primary.slug }`;
+			}
 
 			redirectPath = context.querystring
 				? `${ redirectPath }?${ context.querystring }`
@@ -361,7 +374,7 @@ module.exports = {
 				} else {
 					// If the primary site does not exist, skip redirect
 					// and display a useful error notification
-					showMissingPrimaryError( currentUser, dispatch );
+					showMissingPrimaryError( currentUser, dispatch, next );
 				}
 				return;
 			}
