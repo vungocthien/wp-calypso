@@ -48,6 +48,22 @@ function checkDomainAvailability( domainName, onComplete ) {
 	} );
 }
 
+function checkInboundTransferStatus( domainName, onComplete ) {
+	if ( ! domainName ) {
+		onComplete( null );
+		return;
+	}
+
+	wpcom.undocumented().getInboundTransferStatus( domainName, function( serverError, result ) {
+		if ( serverError ) {
+			onComplete( serverError.error );
+			return;
+		}
+
+		onComplete( null, result );
+	} );
+}
+
 function canRedirect( siteId, domainName, onComplete ) {
 	if ( ! domainName ) {
 		onComplete( new ValidationError( 'empty_query' ) );
@@ -154,6 +170,7 @@ export {
 	canAddGoogleApps,
 	canRedirect,
 	checkDomainAvailability,
+	checkInboundTransferStatus,
 	getFixedDomainSearch,
 	getGoogleAppsSupportedDomains,
 	getPrimaryDomain,
