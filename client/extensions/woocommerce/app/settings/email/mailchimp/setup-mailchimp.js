@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { connect } from 'react-redux';
-import { get, pick, some, isEmpty } from 'lodash';
+import { pick, some, isEmpty } from 'lodash';
 
 /**
  * Internal dependencies
@@ -27,6 +27,8 @@ import NewsletterSettings from './setup-steps/newsletter-settings.js';
 import KeyInputStep from './setup-steps/key-input.js';
 import { getStoreLocation } from 'woocommerce/state/sites/settings/general/selectors';
 import { getCurrencyWithEdits } from 'woocommerce/state/ui/payments/currency/selectors';
+import { getCurrentUserEmail } from 'state/current-user/selectors';
+import { getSiteTimezoneValue } from 'state/selectors';
 
 const LOG_INTO_MAILCHIMP_STEP = 'log_into';
 const KEY_INPUT_STEP = 'key_input';
@@ -67,6 +69,10 @@ class MailChimpSetup extends React.Component {
 		if ( ( nextProps.settings.active_tab === STORE_INFO_STEP ) &&
 			( this.state.step === KEY_INPUT_STEP ) ) {
 			this.setState( { step: STORE_INFO_STEP } );
+			const settings = this.prepareDefaultValues( nextProps.settings );
+			settings.admin_email = nextProps.settings.admin_email || nextProps.currentUserEmail || '';
+			settings.store_timezone = nextProps.settings.store_timezone || nextProps.timezone || 'America/New_York';
+			this.setState( { settings } );
 		} else if ( ( nextProps.settings.active_tab === CAMPAIGN_DEFAULTS_STEP ) &&
 			( this.state.step === STORE_INFO_STEP ) ) {
 			this.setState( { step: CAMPAIGN_DEFAULTS_STEP } );
@@ -91,10 +97,10 @@ class MailChimpSetup extends React.Component {
 		newSettings.campaign_from_name = settings.campaign_from_name || settings.store_name || '';
 		newSettings.campaign_from_email = settings.campaign_from_email || settings.admin_email || '';
 		newSettings.campaign_subject = settings.campaign_subject || settings.store_name || '';
-		newSettings.campaign_language = settings.campaign_language || settings.store_locale || '';
+		newSettings.store_locale = settings.store_locale || 'en';
+		newSettings.campaign_language = settings.campaign_language || settings.store_locale;
 		newSettings.campaign_permission_reminder = settings.campaign_permission_reminder ||
 			'You were subscribed to the newsletter from ' + settings.store_name;
-		newSettings.store_timezone = settings.store_timezone || 'America/NewYork';
 		return newSettings;
 	}
 
@@ -289,7 +295,9 @@ export default localize( connect(
 			isBusy,
 			address,
 			currency,
-			isKeyCorrect
+			isKeyCorrect,
+			currentUserEmail: getCurrentUserEmail( state ),
+			timezone: getSiteTimezoneValue( state, props.siteId )
 		};
 	},
 	{

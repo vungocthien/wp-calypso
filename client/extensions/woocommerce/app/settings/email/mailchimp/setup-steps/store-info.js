@@ -13,11 +13,12 @@ import FormInputValidation from 'components/forms/form-input-validation';
 import TimeZone from 'components/timezone';
 import SettingsPaymentsLocationCurrency from 'woocommerce/app/settings/payments/payments-location-currency.js';
 import { translate } from 'i18n-calypso';
+import LanguagePicker from 'components/language-picker';
+import config from 'config';
 
 const fields = [
 	{ name: 'store_name', label: translate( 'Store Name' ) },
 	{ name: 'store_phone', label: translate( 'Phone' ) },
-	{ name: 'store_locale', label: translate( 'Locale' ) },
 	{ name: 'admin_email', label: translate( 'Admin Email' ) },
 ];
 
@@ -28,6 +29,14 @@ export default ( { storeData, onChange, validateFields } ) => {
 			value
 		} };
 		onChange( e );
+	};
+
+	const selectLanguage = ( e ) => {
+		const event = { target: {
+			name: 'store_locale',
+			value: e.target.value,
+		} };
+		onChange( event );
 	};
 
 	return (
@@ -48,6 +57,15 @@ export default ( { storeData, onChange, validateFields } ) => {
 					{ ( validateFields && ! storeData[ item.name ] ) && <FormInputValidation iserror text="field is required" /> }
 				</div>
 			) ) }
+			<FormLabel>
+				{ translate( 'Locale' ) }
+				<LanguagePicker
+					languages={ config( 'languages' ) }
+					valueKey="langSlug"
+					value={ storeData.store_locale }
+					onChange={ selectLanguage }
+				/>
+			</FormLabel>
 			<FormLabel>
 				{ translate( 'Store Timezone' ) }
 			</FormLabel>
