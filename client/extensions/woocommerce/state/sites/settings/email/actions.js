@@ -1,8 +1,8 @@
 /**
  * Internal dependencies
  */
-import { getSelectedSiteId } from 'state/ui/selectors';
 import request from '../../request';
+import { getSelectedSiteId } from 'state/ui/selectors';
 import {
 	WOOCOMMERCE_MAILCHIMP_SETTINGS_REQUEST,
 	WOOCOMMERCE_MAILCHIMP_SETTINGS_REQUEST_SUCCESS,
