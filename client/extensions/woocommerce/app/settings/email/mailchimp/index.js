@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { connect } from 'react-redux';
-import { filter, matches, includes } from 'lodash';
+import { filter, matches } from 'lodash';
 import classNames from 'classnames';
 
 /**
