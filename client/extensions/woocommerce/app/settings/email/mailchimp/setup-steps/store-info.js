@@ -41,7 +41,7 @@ export default ( { storeData, onChange, validateFields } ) => {
 
 	return (
 		<FormFieldset className="setup-steps__store-info-field">
-			<div>Make sure that store informatin is correct. Every field is required</div>
+			<div>{ translate( 'Make sure that store informatin is correct. Every field is required' ) }</div>
 			<SettingsPaymentsLocationCurrency />
 			{ fields.map( ( item, index ) => (
 				<div key={ index }>
@@ -52,7 +52,7 @@ export default ( { storeData, onChange, validateFields } ) => {
 						name={ item.name }
 						isError={ validateFields && ! storeData[ item.name ] }
 						onChange={ onChange }
-						value={ storeData[ item.name ] }
+						value={ storeData[ item.name ] || '' }
 					/>
 					{ ( validateFields && ! storeData[ item.name ] ) && <FormInputValidation iserror text="field is required" /> }
 				</div>

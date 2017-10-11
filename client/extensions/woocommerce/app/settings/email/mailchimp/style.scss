@@ -187,8 +187,10 @@
 }
 
 .mailchimp__dashboard-settings-preview-view {
+	display: flex;
+	align-items: center;
 	min-width: 160px;
-	min-height:  80px;
+	min-height:  40px;
 	background: lighten( $gray, 30% );
 	box-shadow: 0 0 0 1px transparentize( lighten( $gray, 20% ), .5 ),
 		0 1px 2px $gray;
