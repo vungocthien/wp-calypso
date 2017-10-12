@@ -43,6 +43,7 @@ export default localize(
 				}
 
 				if ( this.props.onTrashingPost ) {
+					this.setState( { isTrashing: false } );
 					this.props.onTrashingPost( error );
 				}
 			}.bind( this );
