@@ -272,7 +272,7 @@ function createSitesComponent( context ) {
 	);
 }
 
-function showMissingPrimaryError( currentUser, dispatch, context, next ) {
+function showMissingPrimaryError( currentUser, dispatch, redirectToPrimary ) {
 	const { username, primary_blog, primary_blog_url, primary_blog_is_jetpack } = currentUser;
 	const tracksPayload = {
 		username,
@@ -293,16 +293,12 @@ function showMissingPrimaryError( currentUser, dispatch, context, next ) {
 			tracksPayload
 		);
 	} else {
-		// Maybe not needed if it takes milliseconds
-		dispatch(
-			warningNotice( i18n.translate( 'Hang on, I need a second' ), {
-				button: 'refresh',
-				href: context.pathname,
-			} )
-		);
 		analytics.tracks.recordEvent( 'calypso_mysites_single_site_error', tracksPayload );
+		dispatch( {
+			type: SITES_ONCE_CHANGED,
+			listener: redirectToPrimary,
+		} );
 	}
-	next();
 }
 
 module.exports = {
@@ -327,7 +323,7 @@ module.exports = {
 
 		const redirectToPrimary = () => {
 			let redirectPath;
-			if ( endsWith( context.pathname, 'undefined' ) ) {
+			if ( ! primary.slug && endsWith( context.pathname, 'undefined' ) ) {
 				redirectPath = context.pathname;
 			} else {
 				redirectPath = `${ context.pathname }/${ primary.slug }`;
@@ -371,12 +367,12 @@ module.exports = {
 			if ( hasInitialized ) {
 				if ( primary ) {
 					redirectToPrimary();
+					return;
 				} else {
 					// If the primary site does not exist, skip redirect
 					// and display a useful error notification
-					showMissingPrimaryError( currentUser, dispatch, next );
+					showMissingPrimaryError( currentUser, dispatch, redirectToPrimary );
 				}
-				return;
 			}
 			dispatch( {
 				type: SITES_ONCE_CHANGED,
