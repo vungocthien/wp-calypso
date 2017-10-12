@@ -294,10 +294,7 @@ function showMissingPrimaryError( currentUser, dispatch, redirectToPrimary ) {
 		);
 	} else {
 		analytics.tracks.recordEvent( 'calypso_mysites_single_site_error', tracksPayload );
-		dispatch( {
-			type: SITES_ONCE_CHANGED,
-			listener: redirectToPrimary,
-		} );
+		redirectToPrimary();
 	}
 }
 
