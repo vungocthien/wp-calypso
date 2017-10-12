@@ -272,7 +272,7 @@ function createSitesComponent( context ) {
 	);
 }
 
-function showMissingPrimaryError( currentUser, dispatch, context ) {
+function showMissingPrimaryError( currentUser, dispatch ) {
 	const { username, primary_blog, primary_blog_url, primary_blog_is_jetpack } = currentUser;
 	const tracksPayload = {
 		username,
@@ -295,10 +295,7 @@ function showMissingPrimaryError( currentUser, dispatch, context ) {
 	} else {
 		analytics.tracks.recordEvent( 'calypso_mysites_single_site_error', tracksPayload );
 		dispatch(
-			warningNotice( i18n.translate( 'Oops, something went wrong!' ), {
-				button: 'refresh',
-				href: context.pathname,
-			} )
+			warningNotice( i18n.translate( 'Oops, something went wrong! Please refresh your browser' ) )
 		);
 	}
 }
@@ -373,7 +370,7 @@ module.exports = {
 				} else {
 					// If the primary site does not exist, skip redirect
 					// and display a useful error notification
-					showMissingPrimaryError( currentUser, dispatch, context );
+					showMissingPrimaryError( currentUser, dispatch );
 				}
 			}
 			dispatch( {
